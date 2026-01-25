@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { prisma } from '@/lib/prisma'
 import { generateShortId } from '@/lib/utils'
+import { LinkManager } from '@/lib/link-manager'
 
 export async function POST(request: Request) {
     try {
@@ -44,20 +45,14 @@ export async function POST(request: Request) {
             )
         }
 
-        // Create story link with short ID & uploader
-        const storyLink = await prisma.storyLink.create({
-            data: {
-                id: generateShortId(6),
-                storeId,
-                uploaderId: userId,
-            }
-        })
+        // Create story link with short ID & uploader using LinkManager
+        const storyLink = await LinkManager.createUniqueStoryLink(storeId, userId)
 
         const response = NextResponse.json({
             id: storyLink.id,
             storeId: storyLink.storeId,
             createdAt: storyLink.createdAt,
-            url: `/${store.slug}?source=story&link=${storyLink.id}`,
+            url: LinkManager.getStoryLinkUrl(store.slug, storyLink.id),
             uploaderBenefit: store.uploaderBenefitText || '업로더 혜택이 없습니다'
         })
 

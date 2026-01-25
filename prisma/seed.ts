@@ -29,8 +29,10 @@ async function main() {
     console.log('   PIN: 1234 (for testing)')
 
     // Create a sample story link
-    const storyLink = await prisma.storyLink.create({
-        data: {
+    const storyLink = await prisma.storyLink.upsert({
+        where: { id: 'a7b1c2' },
+        update: {},
+        create: {
             id: 'a7b1c2',
             storeId: store.id,
         }
