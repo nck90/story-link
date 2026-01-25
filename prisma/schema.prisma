@@ -1,0 +1,86 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String       @id @default(cuid())
+  createdAt   DateTime     @default(now()) @map("created_at")
+  
+  createdLinks StoryLink[]
+  coupons      Coupon[]    @relation("CouponOwner")
+  mileageLogs  MileageLog[]
+
+  @@map("users")
+}
+
+model Store {
+  id                  String      @id @default(cuid())
+  name                String
+  slug                String      @unique
+  description         String?
+  imageUrl            String?     @map("image_url")
+  benefitText         String      @map("benefit_text")
+  uploaderBenefitText String?     @map("uploader_benefit_text")
+  usageCondition      String?     @map("usage_condition")
+  pinHash             String      @map("pin_hash")
+  createdAt           DateTime    @default(now()) @map("created_at")
+
+  storyLinks StoryLink[]
+  coupons    Coupon[]
+
+  @@map("stores")
+}
+
+model StoryLink {
+  id         String   @id @default(cuid())
+  storeId    String   @map("store_id")
+  uploaderId String?  @map("uploader_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  store    Store    @relation(fields: [storeId], references: [id])
+  uploader User?    @relation(fields: [uploaderId], references: [id])
+  coupons  Coupon[]
+
+  @@map("story_links")
+}
+
+enum CouponStatus {
+  ISSUED
+  USED
+  VOID
+}
+
+model Coupon {
+  id          String       @id @default(cuid())
+  storeId     String       @map("store_id")
+  storyLinkId String?      @map("story_link_id")
+  ownerId     String?      @map("owner_id")
+  code        String
+  status      CouponStatus @default(ISSUED)
+  createdAt   DateTime     @default(now()) @map("created_at")
+  usedAt      DateTime?    @map("used_at")
+
+  store     Store      @relation(fields: [storeId], references: [id])
+  storyLink StoryLink? @relation(fields: [storyLinkId], references: [id])
+  owner     User?      @relation("CouponOwner", fields: [ownerId], references: [id])
+
+  @@map("coupons")
+}
+
+model MileageLog {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  amount    Int
+  reason    String
+  couponId  String?  @map("coupon_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("mileage_logs")
+}

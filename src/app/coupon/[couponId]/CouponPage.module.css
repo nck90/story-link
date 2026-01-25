@@ -1,0 +1,192 @@
+.header {
+    padding: var(--space-8) 0 var(--space-4);
+    text-align: center;
+}
+
+.title {
+    font-size: var(--font-size-2xl);
+    font-weight: 700;
+}
+
+.subtitle {
+    margin-top: var(--space-2);
+    color: var(--color-gray-600);
+}
+
+/* Coupon Card */
+.couponCard {
+    margin-top: var(--space-4);
+    padding: var(--space-5);
+    border: 1px solid var(--color-gray-200);
+    border-radius: var(--radius-lg);
+    background: var(--color-white);
+}
+
+.couponHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-2);
+}
+
+.couponLabel {
+    font-size: var(--font-size-sm);
+    color: var(--color-gray-600);
+}
+
+.copyBtn {
+    font-size: var(--font-size-xs);
+    color: var(--color-gray-600);
+    background: none;
+    border: 1px solid var(--color-gray-200);
+    border-radius: var(--radius-sm);
+    padding: var(--space-1) var(--space-2);
+    cursor: pointer;
+}
+
+.copyBtn:hover {
+    background: var(--color-gray-100);
+}
+
+.couponUrl {
+    font-size: var(--font-size-sm);
+    font-family: monospace;
+    color: var(--color-black);
+    padding: var(--space-3);
+    background: var(--color-gray-100);
+    border-radius: var(--radius-md);
+    word-break: break-all;
+}
+
+/* Store Info */
+.storeInfo {
+    margin-top: var(--space-4);
+}
+
+.storeName {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    margin-bottom: var(--space-3);
+}
+
+.benefitBox {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.benefitLabel {
+    font-size: var(--font-size-xs);
+    color: var(--color-gray-600);
+}
+
+.benefitText {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+}
+
+.condition {
+    margin-top: var(--space-3);
+    font-size: var(--font-size-sm);
+    color: var(--color-gray-600);
+    padding: var(--space-3);
+    background: var(--color-gray-100);
+    border-radius: var(--radius-md);
+}
+
+/* Status */
+.statusSection {
+    margin-top: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+}
+
+.usedAt {
+    font-size: var(--font-size-sm);
+    color: var(--color-gray-600);
+}
+
+/* Code */
+.codeSection {
+    margin-top: var(--space-4);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--color-gray-200);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.codeLabel {
+    font-size: var(--font-size-sm);
+    color: var(--color-gray-600);
+}
+
+.code {
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    font-family: monospace;
+    letter-spacing: 0.05em;
+}
+
+/* Actions */
+.actions {
+    margin-top: var(--space-6);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding-bottom: var(--space-10);
+}
+
+/* Modal */
+.modalTitle {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: var(--space-2);
+}
+
+.modalDesc {
+    text-align: center;
+    color: var(--color-gray-600);
+    font-size: var(--font-size-sm);
+    margin-bottom: var(--space-6);
+}
+
+.pinInput {
+    text-align: center;
+    font-size: var(--font-size-2xl);
+    letter-spacing: 0.3em;
+    padding: var(--space-4);
+}
+
+.modalActions {
+    display: flex;
+    gap: var(--space-3);
+    margin-top: var(--space-6);
+}
+
+.modalActions button {
+    flex: 1;
+}
+
+/* Success */
+.successContent {
+    text-align: center;
+    padding: var(--space-4) 0;
+}
+
+.successIcon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto var(--space-4);
+    background: var(--color-success);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    font-weight: bold;
+}
