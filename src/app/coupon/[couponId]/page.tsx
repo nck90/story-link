@@ -1,5 +1,3 @@
-import { notFound } from 'next/navigation'
-import { prisma } from '@/lib/prisma'
 import CouponPageClient from './CouponPageClient'
 
 interface PageProps {
@@ -9,57 +7,16 @@ interface PageProps {
 export default async function CouponPage({ params }: PageProps) {
     const { couponId } = await params
 
-    const coupon = await prisma.coupon.findUnique({
-        where: { id: couponId },
-        include: {
-            store: {
-                select: {
-                    id: true,
-                    name: true,
-                    slug: true,
-                    description: true,
-                    imageUrl: true,
-                    benefitText: true,
-                    usageCondition: true,
-                }
-            }
-        }
-    })
-
-    if (!coupon) {
-        notFound()
-    }
-
     return (
         <CouponPageClient
-            coupon={{
-                id: coupon.id,
-                code: coupon.code,
-                status: coupon.status,
-                createdAt: coupon.createdAt.toISOString(),
-                usedAt: coupon.usedAt?.toISOString() || null,
-                store: coupon.store,
-            }}
+            couponId={couponId}
         />
     )
 }
 
 export async function generateMetadata({ params }: PageProps) {
-    const { couponId } = await params
-
-    const coupon = await prisma.coupon.findUnique({
-        where: { id: couponId },
-        include: {
-            store: { select: { name: true } }
-        }
-    })
-
-    if (!coupon) {
-        return { title: 'Reply' }
-    }
-
     return {
-        title: `${coupon.store.name} 쿠폰 | Reply`,
-        description: `${coupon.store.name}의 특별한 혜택을 사용하세요`,
+        title: '쿠폰 확인 | Reply',
+        description: '발급받은 쿠폰을 확인하세요',
     }
 }

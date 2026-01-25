@@ -2,16 +2,18 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { nanoid } from 'nanoid'
 import styles from './StorePage.module.css'
 
 interface Store {
     id: string
     name: string
     slug: string
-    description: string | null
-    imageUrl: string | null
+    description: string
+    imageUrl: string
     benefitText: string
-    usageCondition: string | null
+    uploaderBenefitText?: string
+    usageCondition: string
 }
 
 interface StorePageClientProps {
@@ -29,46 +31,38 @@ export default function StorePageClient({ store, isFromStory, storyLinkId }: Sto
 
     const handleCreateStoryLink = async () => {
         setLoading(true)
-        try {
-            const res = await fetch('/api/story-links', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ storeId: store.id }),
-            })
+        // Simulate network delay for better UX
+        await new Promise(resolve => setTimeout(resolve, 500))
 
-            if (!res.ok) throw new Error('Failed to create link')
+        const linkId = nanoid(6)
+        const fullUrl = `${window.location.origin}/${store.slug}?source=story&link=${linkId}`
 
-            const data = await res.json()
-            const fullUrl = `${window.location.origin}/${store.slug}?source=story&link=${data.id}`
-            setGeneratedLink(fullUrl)
-
-            if (data.uploaderBenefit) {
-                setUploaderBenefit(data.uploaderBenefit)
-            }
-        } catch (error) {
-            console.error(error)
-            alert('링크 생성에 실패했습니다')
-        } finally {
-            setLoading(false)
+        setGeneratedLink(fullUrl)
+        if (store.uploaderBenefitText) {
+            setUploaderBenefit(store.uploaderBenefitText)
         }
+        setLoading(false)
     }
 
     const handleGetCoupon = async () => {
         setLoading(true)
+        // Simulate processing
+        await new Promise(resolve => setTimeout(resolve, 500))
+
         try {
-            const res = await fetch('/api/coupons', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    storeId: store.id,
-                    storyLinkId: storyLinkId
-                }),
-            })
+            const couponId = nanoid(10)
+            // Save coupon state to localStorage
+            const couponData = {
+                id: couponId,
+                storeId: store.id,
+                storeName: store.name,
+                benefit: store.benefitText,
+                issuedAt: new Date().toISOString(),
+                status: 'ISSUED'
+            }
+            localStorage.setItem(`coupon_${couponId}`, JSON.stringify(couponData))
 
-            if (!res.ok) throw new Error('Failed to create coupon')
-
-            const data = await res.json()
-            router.push(`/coupon/${data.id}`)
+            router.push(`/coupon/${couponId}`)
         } catch (error) {
             console.error(error)
             alert('쿠폰 발급에 실패했습니다')
@@ -85,7 +79,6 @@ export default function StorePageClient({ store, isFromStory, storyLinkId }: Sto
             setCopied(true)
             setTimeout(() => setCopied(false), 2000)
         } catch {
-            // Fallback for older browsers
             const textArea = document.createElement('textarea')
             textArea.value = generatedLink
             document.body.appendChild(textArea)
@@ -112,9 +105,7 @@ export default function StorePageClient({ store, isFromStory, storyLinkId }: Sto
                         </div>
                     )}
                     <h1 className={styles.storeName}>{store.name}</h1>
-                    {store.description && (
-                        <p className={styles.description}>{store.description}</p>
-                    )}
+                    <p className={styles.description}>{store.description}</p>
                 </div>
 
                 {/* Benefit Section */}

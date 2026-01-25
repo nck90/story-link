@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import { prisma } from '@/lib/prisma'
+import { getStoreBySlug } from '@/lib/stores'
 import StorePageClient from './StorePageClient'
 
 interface PageProps {
@@ -11,18 +11,7 @@ export default async function StorePage({ params, searchParams }: PageProps) {
     const { storeSlug } = await params
     const { source, link } = await searchParams
 
-    const store = await prisma.store.findUnique({
-        where: { slug: storeSlug },
-        select: {
-            id: true,
-            name: true,
-            slug: true,
-            description: true,
-            imageUrl: true,
-            benefitText: true,
-            usageCondition: true,
-        }
-    })
+    const store = getStoreBySlug(storeSlug)
 
     if (!store) {
         notFound()
@@ -43,10 +32,7 @@ export default async function StorePage({ params, searchParams }: PageProps) {
 export async function generateMetadata({ params }: PageProps) {
     const { storeSlug } = await params
 
-    const store = await prisma.store.findUnique({
-        where: { slug: storeSlug },
-        select: { name: true, description: true }
-    })
+    const store = getStoreBySlug(storeSlug)
 
     if (!store) {
         return { title: 'Reply' }

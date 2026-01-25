@@ -1,38 +1,98 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import styles from './CouponPage.module.css'
 
 interface Coupon {
     id: string
-    code: string
+    code: string // For now, this can be just the ID or generated
     status: 'ISSUED' | 'USED' | 'VOID'
     createdAt: string
     usedAt: string | null
+    storeId: string
+    storeName: string
+    benefit: string
+    // Simplified store object for display
     store: {
-        id: string
         name: string
-        slug: string
-        description: string | null
-        imageUrl: string | null
         benefitText: string
-        usageCondition: string | null
+        usageCondition: string
     }
 }
 
 interface CouponPageClientProps {
-    coupon: Coupon
+    couponId: string
 }
 
-export default function CouponPageClient({ coupon: initialCoupon }: CouponPageClientProps) {
-    const [coupon, setCoupon] = useState(initialCoupon)
+export default function CouponPageClient({ couponId }: CouponPageClientProps) {
+    const router = useRouter()
+    const [coupon, setCoupon] = useState<Coupon | null>(null)
+    const [loading, setLoading] = useState(true)
     const [showPinModal, setShowPinModal] = useState(false)
     const [pin, setPin] = useState('')
-    const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [success, setSuccess] = useState(false)
     const [copied, setCopied] = useState(false)
     const [mileage, setMileage] = useState<number | null>(null)
+
+    useEffect(() => {
+        // Load coupon from LocalStorage
+        const loadCoupon = () => {
+            try {
+                const stored = localStorage.getItem(`coupon_${couponId}`)
+                if (!stored) {
+                    setLoading(false)
+                    return
+                }
+
+                const data = JSON.parse(stored)
+                // Adapt stored data to Component state structure if needed
+                // In StorePageClient we saved: { id, storeId, storeName, benefit, issuedAt, status }
+                // We need to map this to the structure the view expects
+
+                const hydratedCoupon: Coupon = {
+                    id: data.id,
+                    code: data.id.substring(0, 8).toUpperCase(),
+                    status: data.status,
+                    createdAt: data.issuedAt,
+                    usedAt: data.usedAt || null,
+                    storeId: data.storeId,
+                    storeName: data.storeName,
+                    benefit: data.benefit,
+                    store: {
+                        name: data.storeName,
+                        benefitText: data.benefit,
+                        usageCondition: '직원에게 문의해주세요' // Simplified as we didn't save condition
+                    }
+                }
+                setCoupon(hydratedCoupon)
+
+                if (hydratedCoupon.status === 'USED') {
+                    setSuccess(true)
+                }
+            } catch (e) {
+                console.error('Failed to load coupon', e)
+            } finally {
+                setLoading(false)
+            }
+        }
+        loadCoupon()
+    }, [couponId])
+
+    if (loading) return <div className="page"><div className="container text-center pt-20">로딩중...</div></div>
+
+    if (!coupon) {
+        return (
+            <div className="page">
+                <div className="container text-center pt-20">
+                    <h1 className="text-xl font-bold mb-4">쿠폰을 찾을 수 없습니다</h1>
+                    <p className="text-muted">잘못된 접근이거나 이미 삭제된 쿠폰입니다.</p>
+                    <button className="btn btn-primary mt-6" onClick={() => router.push('/')}>홈으로 돌아가기</button>
+                </div>
+            </div>
+        )
+    }
 
     const isUsed = coupon.status === 'USED'
     const isVoid = coupon.status === 'VOID'
@@ -52,42 +112,44 @@ export default function CouponPageClient({ coupon: initialCoupon }: CouponPageCl
             return
         }
 
+        // Client-side verification (Mock)
         setLoading(true)
-        setError(null)
+        await new Promise(r => setTimeout(r, 800)) // Simulate network delay
 
-        try {
-            const res = await fetch(`/api/coupons/${coupon.id}/redeem`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ pin }),
-            })
-
-            const data = await res.json()
-
-            if (!res.ok) {
-                setError(data.error || 'PIN 인증에 실패했습니다')
-                if (data.attemptsLeft !== undefined) {
-                    setError(`${data.error} (남은 시도: ${data.attemptsLeft}회)`)
-                }
-                return
+        // Accepting any 4 digit PIN for now, or specific one "1234"
+        if (pin === '1234') {
+            const usedAt = new Date().toISOString()
+            const updatedCoupon = {
+                ...coupon,
+                status: 'USED' as const,
+                usedAt
             }
-
+            setCoupon(updatedCoupon)
             setSuccess(true)
-            setCoupon(prev => ({ ...prev, status: 'USED', usedAt: new Date().toISOString() }))
 
-            if (data.mileage) {
-                setMileage(data.mileage)
+            // Update LocalStorage
+            try {
+                // We need to fetch original stored object and update it
+                const stored = localStorage.getItem(`coupon_${couponId}`)
+                if (stored) {
+                    const data = JSON.parse(stored)
+                    data.status = 'USED'
+                    data.usedAt = usedAt
+                    localStorage.setItem(`coupon_${couponId}`, JSON.stringify(data))
+                }
+            } catch (e) {
+                console.error('Failed to update storage', e)
             }
 
-            // Auto close modal after success
+            setMileage(100) // Mock mileage
+
             setTimeout(() => {
                 setShowPinModal(false)
             }, 3000)
-        } catch {
-            setError('서버 오류가 발생했습니다')
-        } finally {
-            setLoading(false)
+        } else {
+            setError('PIN 번호가 올바르지 않습니다 (테스트: 1234)')
         }
+        setLoading(false)
     }
 
     const handleCopyLink = async () => {
