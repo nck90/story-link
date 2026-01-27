@@ -95,26 +95,15 @@ export default function CouponPage({ params }: PageProps) {
                 : `${window.location.origin}${coupon.storeImage}`)
             : `${window.location.origin}/main.jpeg`
 
-        window.Kakao.Share.sendDefault({
-            objectType: 'feed',
-            content: {
-                title: `${coupon.storeName} 쿠폰`,
-                description: `${coupon.benefit}\n쿠폰 코드: ${coupon.id}`,
-                imageUrl: absoluteImageUrl,
-                link: {
-                    mobileWebUrl: currentUrl,
-                    webUrl: currentUrl,
-                },
+        window.Kakao.Share.sendCustom({
+            templateId: 128640,
+            templateArgs: {
+                STORE_NAME: coupon.storeName,
+                BENEFIT: coupon.benefit,
+                COUPON_CODE: coupon.id,
+                IMAGE_URL: absoluteImageUrl,
+                WEB_URL: currentUrl,
             },
-            buttons: [
-                {
-                    title: '쿠폰 보러가기',
-                    link: {
-                        mobileWebUrl: currentUrl,
-                        webUrl: currentUrl,
-                    },
-                },
-            ],
         })
     }
 
