@@ -3,6 +3,13 @@
 import { useState, useEffect } from 'react'
 import styles from './page.module.css'
 
+// Kakao SDK types
+declare global {
+    interface Window {
+        Kakao: any;
+    }
+}
+
 interface CouponData {
     id: string
     storeId: string
@@ -10,6 +17,7 @@ interface CouponData {
     benefit: string
     status: 'ISSUED' | 'USED'
     pinCode?: string
+    storeImage?: string
 }
 
 interface PageProps {
@@ -22,11 +30,18 @@ export default function CouponPage({ params }: PageProps) {
     const [mode, setMode] = useState<'view' | 'use' | 'success'>('view')
     const [pin, setPin] = useState('')
     const [error, setError] = useState('')
+    const [linkCopied, setLinkCopied] = useState(false)
 
     useEffect(() => {
         params.then(p => {
             setCouponId(p.couponId)
-            // Mock Data Load (In real app, fetch from server)
+
+            // Initialize Kakao SDK
+            if (window.Kakao && !window.Kakao.isInitialized()) {
+                const kakaoKey = process.env.NEXT_PUBLIC_KAKAO_APP_KEY || 'demo_key'
+                window.Kakao.init(kakaoKey)
+            }
+
             try {
                 const data = localStorage.getItem(`coupon_${p.couponId}`)
                 if (data) {
@@ -36,15 +51,14 @@ export default function CouponPage({ params }: PageProps) {
                         setMode('success')
                     }
                 } else {
-                    // PRD 7-4: ID Example PASTA-7B1
-                    // Fallback Mock
                     setCoupon({
                         id: p.couponId,
                         storeId: '1',
                         storeName: '먹음직 온천천점',
                         benefit: '소주 or 맥주 한 병 무료',
                         status: 'ISSUED',
-                        pinCode: '0000'
+                        pinCode: '0000',
+                        storeImage: '/main.jpeg'
                     })
                 }
             } catch (e) {
@@ -71,6 +85,55 @@ export default function CouponPage({ params }: PageProps) {
         }
     }
 
+    const handleKakaoShare = () => {
+        if (!window.Kakao || !coupon) return
+
+        const currentUrl = window.location.href
+        const imageUrl = coupon.storeImage
+            ? `${window.location.origin}${coupon.storeImage}`
+            : `${window.location.origin}/main.jpeg`
+
+        window.Kakao.Share.sendDefault({
+            objectType: 'feed',
+            content: {
+                title: `${coupon.storeName} 쿠폰`,
+                description: `${coupon.benefit}\n쿠폰 코드: ${coupon.id}`,
+                imageUrl: imageUrl,
+                link: {
+                    mobileWebUrl: currentUrl,
+                    webUrl: currentUrl,
+                },
+            },
+            buttons: [
+                {
+                    title: '쿠폰 사용하기',
+                    link: {
+                        mobileWebUrl: currentUrl,
+                        webUrl: currentUrl,
+                    },
+                },
+            ],
+        })
+    }
+
+    const handleCopyLink = async () => {
+        const currentUrl = window.location.href
+        try {
+            await navigator.clipboard.writeText(currentUrl)
+            setLinkCopied(true)
+            setTimeout(() => setLinkCopied(false), 2000)
+        } catch {
+            const textArea = document.createElement('textarea')
+            textArea.value = currentUrl
+            document.body.appendChild(textArea)
+            textArea.select()
+            document.execCommand('copy')
+            document.body.removeChild(textArea)
+            setLinkCopied(true)
+            setTimeout(() => setLinkCopied(false), 2000)
+        }
+    }
+
     if (!coupon) return <div className="p-10 text-center">Loading...</div>
 
     return (
@@ -82,7 +145,6 @@ export default function CouponPage({ params }: PageProps) {
                     고기 3인분 이상 주문 시
                 </p>
 
-                {/* PRD 7-4: Coupon Generation Complete Page */}
                 {mode === 'view' && (
                     <>
                         <div className={styles.couponCodeBox}>
@@ -90,17 +152,21 @@ export default function CouponPage({ params }: PageProps) {
                             <p className={styles.codeValue}>{coupon.id}</p>
                         </div>
 
-                        {/* Share Buttons (Mock) */}
                         <div className={styles.shareSection}>
-                            <div className={`${styles.shareButton} ${styles.kakaoButton}`}>
+                            <button
+                                className={`${styles.shareButton} ${styles.kakaoButton}`}
+                                onClick={handleKakaoShare}
+                            >
                                 카카오톡 공유
-                            </div>
-                            <div className={`${styles.shareButton} ${styles.smsButton}`}>
-                                문자 공유
-                            </div>
+                            </button>
+                            <button
+                                className={`${styles.shareButton} ${styles.smsButton}`}
+                                onClick={handleCopyLink}
+                            >
+                                {linkCopied ? '복사 완료' : '링크 복사'}
+                            </button>
                         </div>
 
-                        {/* Save Guide */}
                         <p className={styles.guideText}>
                             이 화면을 캡처하거나 링크를 저장해주세요
                         </p>
@@ -117,15 +183,8 @@ export default function CouponPage({ params }: PageProps) {
                     </>
                 )}
 
-                {/* PRD 7-5: Coupon Usage Page */}
                 {mode === 'use' && (
                     <>
-                        {/* Guide Text: "직원 확인 후 눌러주세요" -> Actually in the PRD, this is a guide BEFORE getting here or ON this page? 
-                           PRD 7-5 UI says: "직원 확인 후 눌러주세요" guide. 
-                           However, flow says: 1. [Use] click -> 2. PIN Input Display. 
-                           So the guide should probably be on the PIN page or the previous page. 
-                           Let's put it clearly here: "직원이 가게 고유 PIN 입력"
-                        */}
                         <div className={styles.pinInputContainer}>
                             <p className="font-bold mb-8 text-lg">직원 확인 후 눌러주세요</p>
                             <input
@@ -155,7 +214,6 @@ export default function CouponPage({ params }: PageProps) {
                     </>
                 )}
 
-                {/* PRD 7-5: Use Complete */}
                 {mode === 'success' && (
                     <div className="py-8">
                         <h2 className={styles.successMessage}>맛있는 식사 되세요!</h2>

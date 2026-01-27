@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, memo } from 'react'
 import { useRouter } from 'next/navigation'
 import { nanoid } from 'nanoid'
 import styles from './StorePage.module.css'
@@ -12,7 +12,7 @@ interface StorePageClientProps {
     storyLinkId: string | null
 }
 
-export default function StorePageClient({ store, isFromStory, storyLinkId }: StorePageClientProps) {
+function StorePageClient({ store, isFromStory, storyLinkId }: StorePageClientProps) {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
     const [generatedLink, setGeneratedLink] = useState<string | null>(null)
@@ -35,7 +35,22 @@ export default function StorePageClient({ store, isFromStory, storyLinkId }: Sto
     const handleGetCoupon = async () => {
         setLoading(true)
         await new Promise(resolve => setTimeout(resolve, 500))
-        const couponId = `${store.slug.toUpperCase()}-${nanoid(3).toUpperCase()}` // PRD 7-4: PASTA-7B1 style
+
+        const couponId = `${store.slug.toUpperCase()}-${nanoid(3).toUpperCase()}`
+
+        // Save coupon with store image
+        const couponData = {
+            id: couponId,
+            storeId: store.id,
+            storeName: store.name,
+            benefit: store.benefitText,
+            issuedAt: new Date().toISOString(),
+            status: 'ISSUED',
+            pinCode: store.pinCode,
+            storeImage: store.images[0] // Add representative image
+        }
+        localStorage.setItem(`coupon_${couponId}`, JSON.stringify(couponData))
+
         router.push(`/coupon/${couponId}`)
     }
 
@@ -163,3 +178,5 @@ export default function StorePageClient({ store, isFromStory, storyLinkId }: Sto
         </div>
     )
 }
+
+export default memo(StorePageClient)
