@@ -102,7 +102,6 @@ export default function CouponPage({ params }: PageProps) {
                 BENEFIT: coupon.benefit,
                 COUPON_CODE: coupon.id,
                 IMAGE_URL: absoluteImageUrl,
-                WEB_URL: `coupon/${coupon.id}`,
             },
         })
     }
