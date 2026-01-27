@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, memo } from 'react'
 import { useRouter } from 'next/navigation'
 import styles from './Dashboard.module.css'
 
@@ -64,9 +64,29 @@ export default function AdminDashboardPage() {
 
     if (loading && !stats) {
         return (
-            <div className={styles.loading}>
-                <div className={styles.spinner}></div>
-                <p className={styles.sectionDesc}>데이터 동기화 중...</p>
+            <div className={styles.page}>
+                <header className={styles.header}>
+                    <div className={styles.headerContent}>
+                        <div className={styles.logoArea}>
+                            <div className={styles.logoIcon}></div>
+                            <h1 className={styles.logoText}>데이터 동기화 중...</h1>
+                        </div>
+                    </div>
+                </header>
+                <main className={styles.main}>
+                    <section className={styles.section}>
+                        <div className={styles.kpiGrid}>
+                            <div className={`${styles.kpiCard} ${styles.skeleton} ${styles.kpiCardSkeleton}`}></div>
+                            <div className={`${styles.kpiCard} ${styles.skeleton} ${styles.kpiCardSkeleton}`}></div>
+                            <div className={`${styles.kpiCard} ${styles.skeleton} ${styles.kpiCardSkeleton}`}></div>
+                        </div>
+                    </section>
+                    <section className={styles.section} style={{ marginTop: '40px' }}>
+                        <div className={`${styles.skeleton} ${styles.tableRowSkeleton}`}></div>
+                        <div className={`${styles.skeleton} ${styles.tableRowSkeleton}`} style={{ animationDelay: '0.1s' }}></div>
+                        <div className={`${styles.skeleton} ${styles.tableRowSkeleton}`} style={{ animationDelay: '0.2s' }}></div>
+                    </section>
+                </main>
             </div>
         )
     }
@@ -152,29 +172,7 @@ export default function AdminDashboardPage() {
                                 </thead>
                                 <tbody>
                                     {stats.breakdown && stats.breakdown.length > 0 ? stats.breakdown.map((s, i) => (
-                                        <tr key={i} className={`${styles.tr} ${styles.trSelected}`} onClick={() => router.push(`/admin/dashboard/${s.storeId}`)}>
-                                            <td className={styles.td}>
-                                                <span className={styles.storeName}>{s.storeName}</span>
-                                            </td>
-                                            <td className={styles.td}>
-                                                <span className={styles.badge}>{s.links}</span>
-                                            </td>
-                                            <td className={`${styles.td} ${styles.numValue}`}>{s.issued}</td>
-                                            <td className={`${styles.td} ${styles.numValue}`}>{s.used}</td>
-                                            <td className={styles.td}>
-                                                <div className={styles.conversionArea}>
-                                                    <div className={styles.progressBar}>
-                                                        <div
-                                                            className={styles.progressFill}
-                                                            style={{ width: s.issued > 0 ? `${Math.min((s.used / s.issued) * 100, 100)}%` : '0%' }}
-                                                        ></div>
-                                                    </div>
-                                                    <span className={styles.percentText}>
-                                                        {s.issued > 0 ? Math.round((s.used / s.issued) * 100) : 0}%
-                                                    </span>
-                                                </div>
-                                            </td>
-                                        </tr>
+                                        <StoreRow key={s.storeId} store={s} onClick={() => router.push(`/admin/dashboard/${s.storeId}`)} />
                                     )) : (
                                         <tr>
                                             <td colSpan={5} className={styles.td} style={{ textAlign: 'center', padding: '100px 0' }}>
@@ -219,3 +217,32 @@ export default function AdminDashboardPage() {
         </div>
     )
 }
+const StoreRow = memo(({ store, onClick }: { store: StoreStat, onClick: () => void }) => {
+    return (
+        <tr className={`${styles.tr} ${styles.trSelected}`} onClick={onClick}>
+            <td className={styles.td}>
+                <span className={styles.storeName}>{store.storeName}</span>
+            </td>
+            <td className={styles.td}>
+                <span className={styles.badge}>{store.links}</span>
+            </td>
+            <td className={`${styles.td} ${styles.numValue}`}>{store.issued}</td>
+            <td className={`${styles.td} ${styles.numValue}`}>{store.used}</td>
+            <td className={styles.td}>
+                <div className={styles.conversionArea}>
+                    <div className={styles.progressBar}>
+                        <div
+                            className={styles.progressFill}
+                            style={{ width: store.issued > 0 ? `${Math.min((store.used / store.issued) * 100, 100)}%` : '0%' }}
+                        ></div>
+                    </div>
+                    <span className={styles.percentText}>
+                        {store.issued > 0 ? Math.round((store.used / store.issued) * 100) : 0}%
+                    </span>
+                </div>
+            </td>
+        </tr>
+    )
+})
+
+StoreRow.displayName = 'StoreRow'

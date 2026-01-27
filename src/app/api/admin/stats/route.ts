@@ -8,11 +8,14 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
     const password = searchParams.get('password')
 
+    const storeId = searchParams.get('storeId')
+
     if (password !== process.env.ADMIN_PASSWORD) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     try {
+        // Optimization: Define common aggregations
         const [totalLinks, totalCouponsIssued, totalCouponsUsed, storeStats] = await Promise.all([
             prisma.linkGen.count(),
             prisma.coupon.count(),
@@ -30,7 +33,7 @@ export async function GET(request: Request) {
             })
         ])
 
-        // For LinkGen, we need to handle it since it only has storeSlug, not storeID
+        // Fetch link stats
         const linkStats = await prisma.linkGen.groupBy({
             by: ['storeSlug'],
             _count: {
@@ -38,12 +41,16 @@ export async function GET(request: Request) {
             }
         })
 
-        // Fetch detailed coupons for each store
-        const allCoupons = await prisma.coupon.findMany({
-            orderBy: {
-                issuedAt: 'desc'
-            }
-        })
+        // Optimization: Only fetch coupon details if a specific storeId is requested
+        let couponDetails: any[] = []
+        if (storeId) {
+            couponDetails = await prisma.coupon.findMany({
+                where: { storeId },
+                orderBy: {
+                    issuedAt: 'desc'
+                }
+            })
+        }
 
         return NextResponse.json({
             linksval: totalLinks,
@@ -59,7 +66,15 @@ export async function GET(request: Request) {
                     .filter((ls: any) => storeSlugs.includes(ls.storeSlug as string))
                     .reduce((acc: number, curr: any) => acc + (curr._count?.id || 0), 0)
 
-                const storeCoupons = allCoupons.filter((c: any) => c.storeId === s.storeId)
+                // Only return detailed coupons if they belong to the requested storeId
+                const det = (storeId === s.storeId) ? couponDetails.map((c: any) => ({
+                    id: c.id,
+                    code: c.code,
+                    status: c.status,
+                    issuedAt: c.issuedAt,
+                    usedAt: c.usedAt,
+                    expiresAt: c.expiresAt
+                })) : []
 
                 return {
                     storeId: s.storeId,
@@ -67,14 +82,7 @@ export async function GET(request: Request) {
                     issued: s._count.id,
                     used: s._count.usedAt,
                     links: linksCount,
-                    couponDetails: storeCoupons.map((c: any) => ({
-                        id: c.id,
-                        code: c.code,
-                        status: c.status,
-                        issuedAt: c.issuedAt,
-                        usedAt: c.usedAt,
-                        expiresAt: c.expiresAt
-                    }))
+                    couponDetails: det
                 }
             })
         })

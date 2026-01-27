@@ -41,7 +41,7 @@ export default function StoreDetailPage({ params }: { params: Promise<{ storeId:
 
         const fetchStats = async () => {
             try {
-                const res = await fetch(`/api/admin/stats?password=${password}`)
+                const res = await fetch(`/api/admin/stats?password=${password}&storeId=${storeId}`)
                 if (res.ok) {
                     const data = await res.json()
                     setStats(data)
@@ -104,9 +104,31 @@ export default function StoreDetailPage({ params }: { params: Promise<{ storeId:
 
     if (loading && !stats) {
         return (
-            <div className={styles.loading}>
-                <div className={styles.spinner}></div>
-                <p className={styles.sectionDesc}>매장 데이터를 분석 중입니다...</p>
+            <div className={styles.page}>
+                <header className={styles.header}>
+                    <div className={styles.headerContent}>
+                        <div className={styles.logoArea}>
+                            <div className={styles.logoIcon}></div>
+                            <h1 className={styles.logoText}>매장 데이터를 로드 중...</h1>
+                        </div>
+                    </div>
+                </header>
+                <main className={styles.main}>
+                    <section className={styles.section}>
+                        <div className={styles.kpiGrid}>
+                            <div className={`${styles.kpiCard} ${styles.skeleton} ${styles.kpiCardSkeleton}`}></div>
+                            <div className={`${styles.kpiCard} ${styles.skeleton} ${styles.kpiCardSkeleton}`}></div>
+                            <div className={`${styles.kpiCard} ${styles.skeleton} ${styles.kpiCardSkeleton}`}></div>
+                        </div>
+                    </section>
+                    <section className={styles.section} style={{ marginTop: '40px' }}>
+                        <div className={styles.couponGrid}>
+                            <div className={`${styles.couponCard} ${styles.skeleton} ${styles.couponCardSkeleton}`}></div>
+                            <div className={`${styles.couponCard} ${styles.skeleton} ${styles.couponCardSkeleton}`} style={{ animationDelay: '0.1s' }}></div>
+                            <div className={`${styles.couponCard} ${styles.skeleton} ${styles.couponCardSkeleton}`} style={{ animationDelay: '0.2s' }}></div>
+                        </div>
+                    </section>
+                </main>
             </div>
         )
     }
