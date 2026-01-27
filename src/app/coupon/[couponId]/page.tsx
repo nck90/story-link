@@ -99,12 +99,16 @@ export default function CouponPage({ params }: PageProps) {
                 title: `${coupon.storeName} 쿠폰`,
                 description: `${coupon.benefit}\n쿠폰 코드: ${coupon.id}`,
                 imageUrl: imageUrl,
-                link: {
-                    mobileWebUrl: currentUrl,
-                    webUrl: currentUrl,
-                },
             },
-            buttonTitle: '쿠폰 보러가기',
+            buttons: [
+                {
+                    title: '쿠폰 보러가기',
+                    link: {
+                        mobileWebUrl: currentUrl,
+                        webUrl: currentUrl,
+                    },
+                },
+            ],
         })
     }
 
