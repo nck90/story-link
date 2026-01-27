@@ -1,0 +1,130 @@
+/* coupon/page.module.css */
+.page {
+    min-height: 100vh;
+    background-color: var(--color-gray-100);
+    /* Consistent light bg */
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.card {
+    background: var(--color-white);
+    width: 100%;
+    border-radius: 24px;
+    /* Consistent radius */
+    padding: 32px 24px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.storeName {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-gray-500);
+    margin-bottom: 12px;
+}
+
+.title {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--color-black);
+    margin-bottom: 24px;
+    line-height: 1.3;
+}
+
+.couponCodeBox {
+    background: var(--color-gray-50);
+    border: 1px dashed var(--color-gray-300);
+    border-radius: 12px;
+    padding: 24px;
+    margin: 24px 0;
+}
+
+.codeLabel {
+    font-size: 12px;
+    color: var(--color-gray-500);
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.codeValue {
+    font-size: 28px;
+    font-weight: 800;
+    font-family: monospace;
+    color: var(--color-primary);
+    letter-spacing: 2px;
+}
+
+.shareSection {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.shareButton {
+    flex: 1;
+    height: 48px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.kakaoButton {
+    background-color: #FEE500;
+    color: #000000;
+}
+
+.smsButton {
+    background-color: var(--color-gray-100);
+    color: var(--color-black);
+}
+
+.guideText {
+    font-size: 13px;
+    color: var(--color-gray-500);
+    margin-top: 16px;
+}
+
+.pinInputContainer {
+    margin: 24px 0;
+}
+
+.pinInput {
+    font-size: 32px;
+    text-align: center;
+    letter-spacing: 8px;
+    width: 100%;
+    padding: 16px;
+    border: none;
+    border-bottom: 2px solid var(--color-gray-200);
+    outline: none;
+    background: transparent;
+    transition: border-color 0.2s;
+}
+
+.pinInput:focus {
+    border-color: var(--color-primary);
+}
+
+.successMessage {
+    color: var(--color-black);
+    font-weight: 800;
+    font-size: 24px;
+    margin-bottom: 8px;
+}
+
+.buttonGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 32px;
+}

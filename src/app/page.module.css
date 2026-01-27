@@ -1,21 +1,117 @@
-.hero {
-    padding: var(--space-12) 0;
-    text-align: center;
+/* page.module.css */
+.container {
+    width: 100%;
+    /* Inherit max-width from global if needed, but ensure it fills available space */
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color-white);
+}
+
+.main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: var(--space-8) var(--space-6);
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.brand {
+    margin-top: 20vh;
+    z-index: 10;
 }
 
 .title {
-    font-size: 48px;
-    font-weight: 800;
-    letter-spacing: -0.02em;
+    font-size: 15vw;
+    /* Responsive font size */
+    font-size: clamp(40px, 15vw, 64px);
+    font-weight: 900;
+    letter-spacing: -2px;
+    color: var(--color-black);
+    margin-bottom: var(--space-4);
+    background: linear-gradient(135deg, #FF4F00 0%, #ff8e5e 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1.1;
 }
 
-.subtitle {
-    margin-top: var(--space-4);
-    font-size: var(--font-size-lg);
-    color: var(--color-gray-600);
-    line-height: 1.6;
+
+
+.tagline {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    color: var(--color-gray-800);
+    line-height: 1.4;
 }
 
-.info {
-    margin-top: var(--space-8);
+/* Abstract Visuals */
+.visualPlaceholder {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.circle1 {
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    width: 70vw;
+    height: 70vw;
+    max-width: 300px;
+    max-height: 300px;
+    background: radial-gradient(circle, rgba(255, 79, 0, 0.08) 0%, transparent 70%);
+    border-radius: 50%;
+    filter: blur(40px);
+    animation: float 6s ease-in-out infinite;
+}
+
+.circle2 {
+    position: absolute;
+    bottom: 100px;
+    left: -50px;
+    width: 60vw;
+    height: 60vw;
+    max-width: 200px;
+    max-height: 200px;
+    background: radial-gradient(circle, rgba(255, 142, 94, 0.08) 0%, transparent 70%);
+    border-radius: 50%;
+    filter: blur(30px);
+    animation: float 8s ease-in-out infinite reverse;
+}
+
+@keyframes float {
+    0% {
+        transform: translate(0, 0);
+    }
+
+    50% {
+        transform: translate(10px, -20px);
+    }
+
+    100% {
+        transform: translate(0, 0);
+    }
+}
+
+.bottomSection {
+    margin-top: auto;
+    z-index: 10;
+    padding-bottom: var(--space-8);
+    width: 100%;
+}
+
+.guideText {
+    text-align: center;
+    color: var(--color-gray-500);
+    font-size: var(--font-size-sm);
+    margin-bottom: var(--space-4);
 }
