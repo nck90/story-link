@@ -229,7 +229,8 @@ export default function CouponPage({ params }: PageProps) {
                             </button>
                             {!canUse && (
                                 <p className="text-xs text-red-500 mt-2 font-bold animate-pulse">
-                                    스토리 업로드 후, 매장 직원에게 문의하세요.
+                                    친구의 소중했던 경험을<br />
+                                    직접 체험해보세요!
                                 </p>
                             )}
                         </div>
