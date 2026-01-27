@@ -92,11 +92,13 @@ function StorePageClient({ store, isFromStory, storyLinkId }: StorePageClientPro
 
                 router.push(`/coupon/${coupon.id}`)
             } else {
-                console.error('Failed to issue coupon')
+                const errorData = await res.json()
+                alert(errorData.error || '쿠폰 발급 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.')
                 setLoading(false)
             }
         } catch (error) {
             console.error('Error issuing coupon:', error)
+            alert('일시적인 시스템 오류가 발생했습니다. 네트워크 상태를 확인해주세요.')
             setLoading(false)
         }
     }
@@ -153,14 +155,6 @@ function StorePageClient({ store, isFromStory, storyLinkId }: StorePageClientPro
     /* PRD 7-1 & 7-3: Store Landing & Pre-Coupon */
     return (
         <div className={styles.container}>
-            <div className={styles.brandHeader}>
-                <span
-                    className={styles.brandText}
-                    onClick={handleLogoClick}
-                >
-                    Reply
-                </span>
-            </div>
             {/* Hero Section */}
             <div className={styles.heroImageWrapper}>
                 <img
@@ -169,7 +163,13 @@ function StorePageClient({ store, isFromStory, storyLinkId }: StorePageClientPro
                     className={styles.heroImage}
                 />
                 {store.logoUrl && (
-                    <img src={store.logoUrl} alt="Logo" className={styles.logoOverlay} />
+                    <img
+                        src={store.logoUrl}
+                        alt="Logo"
+                        className={styles.logoOverlay}
+                        onClick={handleLogoClick}
+                        style={{ cursor: 'pointer' }}
+                    />
                 )}
                 <div className={styles.imageOverlay}>
                     <span className={styles.categoryTag}>{store.category}</span>

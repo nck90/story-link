@@ -25,12 +25,6 @@ export async function POST(request: Request) {
         return NextResponse.json(linkGen)
     } catch (error) {
         console.error('Failed to create link gen record:', error)
-        // Return mock data when database is unavailable (demo mode)
-        return NextResponse.json({
-            id: 'demo-' + Date.now(),
-            storeSlug: storeSlug,
-            createdAt: new Date().toISOString(),
-            dbStatus: 'disconnected'
-        })
+        return NextResponse.json({ error: '시스템 오류로 링크를 생성할 수 없습니다. 잠시 후 다시 시도해주세요.' }, { status: 500 })
     }
 }

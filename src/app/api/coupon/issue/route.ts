@@ -9,13 +9,25 @@ export async function POST(request: Request) {
 
     try {
         const body = await request.json()
-        let storeId = 'meokumjik'
-        let storeName = '온천천 먹음직'
-        let benefit = '소주 or 맥주 한 병 무료'
-        const linkGenId = body.linkGenId
+        // Use the values from body if present, otherwise keep defaults
+        storeId = body.storeId || storeId
+        storeName = body.storeName || storeName
+        benefit = body.benefit || benefit
+        let linkGenId = body.linkGenId
 
         if (!storeId || !storeName || !benefit) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+        }
+
+        // Verify if linkGenId exists in DB before linking
+        if (linkGenId) {
+            const exists = await prisma.linkGen.findUnique({
+                where: { id: linkGenId }
+            })
+            if (!exists) {
+                console.warn(`LinkGen ID ${linkGenId} not found. Issuing unlinked coupon.`)
+                linkGenId = null
+            }
         }
 
         // Generate unique ID (e.g., STORE-XXX)
