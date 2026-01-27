@@ -106,7 +106,7 @@ export default function CouponPage({ params }: PageProps) {
             },
             buttons: [
                 {
-                    title: '쿠폰 사용하기',
+                    title: '쿠폰 보러가기',
                     link: {
                         mobileWebUrl: currentUrl,
                         webUrl: currentUrl,
