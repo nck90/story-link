@@ -49,17 +49,17 @@ export async function GET(request: Request) {
             linksval: totalLinks,
             coupons: totalCouponsIssued,
             used: totalCouponsUsed,
-            breakdown: storeStats.map(s => {
+            breakdown: storeStats.map((s: any) => {
                 // Find all slugs associated with this storeId
                 const storeObj = STORES.find(st => st.id === s.storeId)
                 const storeSlugs = storeObj ? [storeObj.slug] : []
 
                 // Sum up links for all slugs of this store
                 const linksCount = linkStats
-                    .filter(ls => storeSlugs.includes(ls.storeSlug as string))
-                    .reduce((acc: number, curr: any) => acc + curr._count.id, 0)
+                    .filter((ls: any) => storeSlugs.includes(ls.storeSlug as string))
+                    .reduce((acc: number, curr: any) => acc + (curr._count?.id || 0), 0)
 
-                const storeCoupons = allCoupons.filter(c => c.storeId === s.storeId)
+                const storeCoupons = allCoupons.filter((c: any) => c.storeId === s.storeId)
 
                 return {
                     storeId: s.storeId,
@@ -67,7 +67,7 @@ export async function GET(request: Request) {
                     issued: s._count.id,
                     used: s._count.usedAt,
                     links: linksCount,
-                    couponDetails: storeCoupons.map(c => ({
+                    couponDetails: storeCoupons.map((c: any) => ({
                         id: c.id,
                         code: c.code,
                         status: c.status,
