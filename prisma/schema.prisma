@@ -1,0 +1,33 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+
+model LinkGen {
+  id        String   @id @default(uuid())
+  storeSlug String
+  ipAddress String?
+  createdAt DateTime @default(now())
+  
+  coupons   Coupon[]
+}
+
+model Coupon {
+  id        String   @id // Custom ID format (STORE-XXX)
+  code      String   // Unique hidden code if needed, or same as ID
+  status    String   @default("ISSUED") // "ISSUED" or "USED"
+  storeId   String
+  storeName String
+  benefit   String
+  issuedAt  DateTime @default(now())
+  usedAt    DateTime?
+  expiresAt DateTime?
+  
+  linkGenId String?
+  linkGen   LinkGen? @relation(fields: [linkGenId], references: [id])
+}

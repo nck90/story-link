@@ -18,40 +18,87 @@ function StorePageClient({ store, isFromStory, storyLinkId }: StorePageClientPro
     const [generatedLink, setGeneratedLink] = useState<string | null>(null)
     const [copied, setCopied] = useState(false)
     const [viewMode, setViewMode] = useState<'landing' | 'link_created'>('landing')
+    const [logoClicks, setLogoClicks] = useState(0)
+
+    const handleLogoClick = () => {
+        const newClicks = logoClicks + 1
+        if (newClicks >= 3) {
+            router.push('/admin')
+        } else {
+            setLogoClicks(newClicks)
+            // Optional: reset after 2 seconds of inactivity
+            setTimeout(() => setLogoClicks(0), 2000)
+        }
+    }
 
     // Handle Create Story Link
     const handleCreateStoryLink = async () => {
         setLoading(true)
-        await new Promise(resolve => setTimeout(resolve, 500))
 
-        const linkId = nanoid(8) // PRD 7-2: 6~8 digits
-        const shortLink = `${window.location.host}/${store.slug}/${linkId}` // Showing host/slug/id for visual
+        try {
+            const linkId = nanoid(8) // PRD 7-2: 6~8 digits
 
-        setGeneratedLink(shortLink)
-        setViewMode('link_created')
-        setLoading(false)
+            // Call API to track link creation based on store slug
+            await fetch('/api/link', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    id: linkId,
+                    storeSlug: store.slug,
+                }),
+            })
+
+            const shortLink = `${window.location.host}/${store.slug}/${linkId}` // Showing host/slug/id for visual
+
+            setGeneratedLink(shortLink)
+            setViewMode('link_created')
+        } catch (error) {
+            console.error('Failed to create link:', error)
+            // Fallback to client-side generation if API fails, to not block user
+            const linkId = nanoid(8)
+            const shortLink = `${window.location.host}/${store.slug}/${linkId}`
+            setGeneratedLink(shortLink)
+            setViewMode('link_created')
+        } finally {
+            setLoading(false)
+        }
     }
 
     const handleGetCoupon = async () => {
         setLoading(true)
-        await new Promise(resolve => setTimeout(resolve, 500))
 
-        const couponId = `${store.slug.toUpperCase()}-${nanoid(3).toUpperCase()}`
+        try {
+            // Call API to issue coupon
+            const res = await fetch('/api/coupon/issue', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    storeId: store.id,
+                    storeName: store.name,
+                    benefit: store.benefitText,
+                    linkGenId: storyLinkId, // Pass the link ID from URL if available
+                }),
+            })
 
-        // Save coupon with store image
-        const couponData = {
-            id: couponId,
-            storeId: store.id,
-            storeName: store.name,
-            benefit: store.benefitText,
-            issuedAt: new Date().toISOString(),
-            status: 'ISSUED',
-            pinCode: store.pinCode,
-            storeImage: store.images[0] // Add representative image
+            if (res.ok) {
+                const coupon = await res.json()
+                // Store in local storage as backup / cache specific to device
+                // But source of truth is DB now
+                localStorage.setItem(`coupon_${coupon.id}`, JSON.stringify(coupon))
+
+                router.push(`/coupon/${coupon.id}`)
+            } else {
+                console.error('Failed to issue coupon')
+                setLoading(false)
+            }
+        } catch (error) {
+            console.error('Error issuing coupon:', error)
+            setLoading(false)
         }
-        localStorage.setItem(`coupon_${couponId}`, JSON.stringify(couponData))
-
-        router.push(`/coupon/${couponId}`)
     }
 
     const handleCopyLink = async () => {
@@ -80,6 +127,11 @@ function StorePageClient({ store, isFromStory, storyLinkId }: StorePageClientPro
                         <p className={styles.linkDisplayText}>{generatedLink}</p>
                     </div>
 
+                    <div className={styles.uploaderBenefitBox}>
+                        <p className={styles.uploaderBenefitTitle}>업로더에 대한 혜택</p>
+                        <p className={styles.uploaderBenefitText}>음료 한 병 무료</p>
+                    </div>
+
                     <button
                         className={`btn btn-primary ${styles.copyButton}`}
                         onClick={handleCopyLink}
@@ -88,7 +140,10 @@ function StorePageClient({ store, isFromStory, storyLinkId }: StorePageClientPro
                     </button>
 
                     <div className={styles.linkGuideBox}>
-                        <p className={styles.linkGuideText}>쿠폰을 스토리와 함께 올려보세요!</p>
+                        <p className={styles.linkGuideText}>
+                            쿠폰을 스토리와 함께 업로드 후<br />
+                            직원에게 문의 해주세요!
+                        </p>
                     </div>
                 </div>
             </div>
@@ -98,6 +153,14 @@ function StorePageClient({ store, isFromStory, storyLinkId }: StorePageClientPro
     /* PRD 7-1 & 7-3: Store Landing & Pre-Coupon */
     return (
         <div className={styles.container}>
+            <div className={styles.brandHeader}>
+                <span
+                    className={styles.brandText}
+                    onClick={handleLogoClick}
+                >
+                    Reply
+                </span>
+            </div>
             {/* Hero Section */}
             <div className={styles.heroImageWrapper}>
                 <img

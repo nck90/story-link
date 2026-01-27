@@ -16,6 +16,7 @@ interface CouponData {
     storeName: string
     benefit: string
     status: 'ISSUED' | 'USED'
+    issuedAt?: string
     pinCode?: string
     storeImage?: string
 }
@@ -31,6 +32,8 @@ export default function CouponPage({ params }: PageProps) {
     const [pin, setPin] = useState('')
     const [error, setError] = useState('')
     const [linkCopied, setLinkCopied] = useState(false)
+    const [timeLeft, setTimeLeft] = useState('')
+    const [canUse, setCanUse] = useState(false)
 
     useEffect(() => {
         params.then(p => {
@@ -42,43 +45,92 @@ export default function CouponPage({ params }: PageProps) {
                 window.Kakao.init(kakaoKey)
             }
 
-            try {
-                const data = localStorage.getItem(`coupon_${p.couponId}`)
-                if (data) {
-                    const parsed = JSON.parse(data)
-                    setCoupon(parsed)
-                    if (parsed.status === 'USED') {
+            // Fetch coupon from API
+            fetch(`/api/coupon/${p.couponId}`)
+                .then(res => {
+                    if (res.ok) return res.json()
+                    throw new Error('Coupon not found')
+                })
+                .then(data => {
+                    setCoupon(data)
+                    if (data.status === 'USED') {
                         setMode('success')
                     }
-                } else {
-                    setCoupon({
-                        id: p.couponId,
-                        storeId: '1',
-                        storeName: '먹음직 온천천점',
-                        benefit: '소주 or 맥주 한 병 무료',
-                        status: 'ISSUED',
-                        pinCode: '0000',
-                        storeImage: '/main.jpeg'
-                    })
-                }
-            } catch (e) {
-                console.error(e)
-            }
+                })
+                .catch(err => {
+                    console.error('Failed to fetch coupon:', err)
+                    // Fallback to local storage if API fails
+                    const localData = localStorage.getItem(`coupon_${p.couponId}`)
+                    if (localData) {
+                        setCoupon(JSON.parse(localData))
+                    }
+                })
         })
     }, [params])
 
+    // Timer Logic
+    useEffect(() => {
+        if (!coupon || mode !== 'view') return
+
+        const checkTime = () => {
+            if (!coupon.issuedAt) {
+                setCanUse(true)
+                return
+            }
+
+            const issued = new Date(coupon.issuedAt).getTime()
+            const now = new Date().getTime()
+            const diff = now - issued
+            const threeHours = 3 * 60 * 60 * 1000
+
+            if (diff >= threeHours) {
+                setCanUse(true)
+                setTimeLeft('')
+            } else {
+                setCanUse(false)
+                const remaining = threeHours - diff
+                const hours = Math.floor(remaining / (1000 * 60 * 60))
+                const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60))
+                const seconds = Math.floor((remaining % (1000 * 60)) / 1000)
+                setTimeLeft(`${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`)
+            }
+        }
+
+        checkTime() // Initial check
+        const timer = setInterval(checkTime, 1000)
+
+        return () => clearInterval(timer)
+    }, [coupon, mode])
+
     const handleUseClick = () => {
+        if (!canUse) return
         setMode('use')
     }
 
-    const handlePinSubmit = () => {
+    const handlePinSubmit = async () => {
         if (!coupon) return
 
         if (pin === (coupon.pinCode || '0000')) {
-            const updated = { ...coupon, status: 'USED' as const }
-            localStorage.setItem(`coupon_${couponId}`, JSON.stringify(updated))
-            setCoupon(updated)
-            setMode('success')
+            try {
+                const res = await fetch('/api/coupon/use', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ couponId: coupon.id })
+                })
+
+                if (res.ok) {
+                    const updated = await res.json()
+                    setCoupon(updated)
+                    setMode('success')
+                    // Update local backup
+                    localStorage.setItem(`coupon_${couponId}`, JSON.stringify(updated))
+                } else {
+                    const errorData = await res.json()
+                    setError(errorData.error || '쿠폰 사용 처리 중 오류가 발생했습니다.')
+                }
+            } catch (err) {
+                setError('네트워크 오류가 발생했습니다.')
+            }
         } else {
             setError('PIN 번호가 올바르지 않습니다')
             setPin('')
@@ -163,12 +215,18 @@ export default function CouponPage({ params }: PageProps) {
 
                         <div className={styles.buttonGroup}>
                             <button
-                                className="btn btn-primary"
+                                className={`btn btn-primary ${!canUse ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 onClick={handleUseClick}
+                                disabled={!canUse}
                                 style={{ height: '56px', fontSize: '16px', fontWeight: 700 }}
                             >
-                                사용하기
+                                {canUse ? '사용하기' : `${timeLeft} 후 사용 가능`}
                             </button>
+                            {!canUse && (
+                                <p className="text-xs text-red-500 mt-2 font-bold animate-pulse">
+                                    스토리 업로드 후, 매장 직원에게 문의하세요.
+                                </p>
+                            )}
                         </div>
                     </>
                 )}
