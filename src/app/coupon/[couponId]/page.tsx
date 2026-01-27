@@ -89,8 +89,10 @@ export default function CouponPage({ params }: PageProps) {
         if (!window.Kakao || !coupon) return
 
         const currentUrl = window.location.href
-        const imageUrl = coupon.storeImage
-            ? `${window.location.origin}${coupon.storeImage}`
+        const absoluteImageUrl = coupon.storeImage
+            ? (coupon.storeImage.startsWith('http')
+                ? coupon.storeImage
+                : `${window.location.origin}${coupon.storeImage}`)
             : `${window.location.origin}/main.jpeg`
 
         window.Kakao.Share.sendDefault({
@@ -98,7 +100,11 @@ export default function CouponPage({ params }: PageProps) {
             content: {
                 title: `${coupon.storeName} 쿠폰`,
                 description: `${coupon.benefit}\n쿠폰 코드: ${coupon.id}`,
-                imageUrl: imageUrl,
+                imageUrl: absoluteImageUrl,
+                link: {
+                    mobileWebUrl: currentUrl,
+                    webUrl: currentUrl,
+                },
             },
             buttons: [
                 {
