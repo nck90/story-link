@@ -20,32 +20,12 @@ export async function GET(request: Request, { params }: RouteParams) {
         })
 
         if (!coupon) {
-            // Return mock coupon for demo mode if not found
-            return NextResponse.json({
-                id: couponId,
-                code: couponId.split('-')[1] || 'DEMO',
-                status: 'ISSUED',
-                storeId: couponId.split('-')[0] || 'DEMO',
-                storeName: 'Demo Store',
-                benefit: 'Demo Benefit',
-                issuedAt: new Date().toISOString(),
-                dbStatus: 'not_found'
-            })
+            return NextResponse.json({ error: '쿠폰을 찾을 수 없습니다.' }, { status: 404 })
         }
 
         return NextResponse.json(coupon)
     } catch (error) {
         console.error('Failed to fetch coupon:', error)
-        // Return mock coupon when database is unavailable (demo mode)
-        return NextResponse.json({
-            id: couponId,
-            code: couponId.split('-')[1] || 'DEMO',
-            status: 'ISSUED',
-            storeId: couponId.split('-')[0] || 'DEMO',
-            storeName: 'Demo Store',
-            benefit: 'Demo Benefit',
-            issuedAt: new Date().toISOString(),
-            dbStatus: 'disconnected'
-        })
+        return NextResponse.json({ error: '시스템 오류가 발생했습니다.' }, { status: 500 })
     }
 }

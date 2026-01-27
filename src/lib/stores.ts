@@ -16,7 +16,7 @@ export interface Store {
 export const STORES: Store[] = [
     {
         id: '1',
-        name: '먹음직 온천천점',
+        name: '온천천 먹음직',
         slug: 'pasta', // Keeping 'pasta' slug as requested for continuity or changing? PRD says "먹음직 온천천점". 
         // Note: User prompt has "인사불성 파스타 -> 먹음직 온천천점" but let's check if slug needs change.
         // User didn't explicitly say change slug, but I should probably add a new one or update this one.

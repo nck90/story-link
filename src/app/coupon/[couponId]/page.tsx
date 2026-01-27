@@ -17,6 +17,7 @@ interface CouponData {
     benefit: string
     status: 'ISSUED' | 'USED'
     issuedAt?: string
+    expiresAt?: string
     pinCode?: string
     storeImage?: string
 }
@@ -73,25 +74,29 @@ export default function CouponPage({ params }: PageProps) {
         if (!coupon || mode !== 'view') return
 
         const checkTime = () => {
-            if (!coupon.issuedAt) {
+            // Anchor to expiresAt from server
+            let expiryTime: number
+            if (coupon.expiresAt) {
+                expiryTime = new Date(coupon.expiresAt).getTime()
+            } else if (coupon.issuedAt) {
+                // Fallback for legacy data: issuedAt + 3h
+                expiryTime = new Date(coupon.issuedAt).getTime() + 3 * 60 * 60 * 1000
+            } else {
                 setCanUse(true)
                 return
             }
 
-            const issued = new Date(coupon.issuedAt).getTime()
             const now = new Date().getTime()
-            const diff = now - issued
-            const threeHours = 3 * 60 * 60 * 1000
+            const diff = expiryTime - now
 
-            if (diff >= threeHours) {
+            if (diff <= 0) {
                 setCanUse(true)
                 setTimeLeft('')
             } else {
                 setCanUse(false)
-                const remaining = threeHours - diff
-                const hours = Math.floor(remaining / (1000 * 60 * 60))
-                const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60))
-                const seconds = Math.floor((remaining % (1000 * 60)) / 1000)
+                const hours = Math.floor(diff / (1000 * 60 * 60))
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
+                const seconds = Math.floor((diff % (1000 * 60)) / 1000)
                 setTimeLeft(`${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`)
             }
         }
@@ -181,10 +186,10 @@ export default function CouponPage({ params }: PageProps) {
     return (
         <div className={styles.page}>
             <div className={styles.card}>
-                <p className={styles.storeName}>{coupon.storeName}</p>
-                <h1 className={styles.title}>{coupon.benefit}</h1>
+                <p className={styles.storeName}>온천천 먹음직</p>
+                <h1 className={styles.title}>방문 시, 쿠폰 혜택</h1>
                 <p className="text-sm text-gray-500 mb-6 font-medium">
-                    고기 3인분 이상 주문 시
+                    {coupon.benefit}
                 </p>
 
                 {mode === 'view' && (
