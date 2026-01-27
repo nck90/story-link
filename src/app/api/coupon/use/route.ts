@@ -22,14 +22,21 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Coupon already used' }, { status: 400 })
         }
 
-        // 3-Hour Rule Check (Server Side)
-        const issuedAt = new Date(coupon.issuedAt).getTime()
-        const now = new Date().getTime()
-        const threeHours = 3 * 60 * 60 * 1000
+        // Expiration/Activation Check (Server Side)
+        let isExpired = false
+        if (coupon.expiresAt) {
+            isExpired = new Date(coupon.expiresAt).getTime() <= new Date().getTime()
+        } else {
+            // Fallback for legacy data: 3-Hour Rule
+            const issuedAt = new Date(coupon.issuedAt).getTime()
+            const now = new Date().getTime()
+            const threeHours = 3 * 60 * 60 * 1000
+            isExpired = now - issuedAt >= threeHours
+        }
 
-        if (now - issuedAt < threeHours) {
+        if (!isExpired) {
             return NextResponse.json({
-                error: 'Coupon is not yet active. Please wait 3 hours after issuance.'
+                error: '쿠폰이 아직 활성화되지 않았습니다. 잠시 후 다시 시도해주세요.'
             }, { status: 403 })
         }
 

@@ -115,7 +115,7 @@ export default function CouponPage({ params }: PageProps) {
     const handlePinSubmit = async () => {
         if (!coupon) return
 
-        if (pin === (coupon.pinCode || '0000')) {
+        if (pin === (coupon.pinCode || '0001')) {
             try {
                 const res = await fetch('/api/coupon/use', {
                     method: 'POST',

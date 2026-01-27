@@ -42,7 +42,7 @@ export const STORES: Store[] = [
         benefitText: '소주 or 맥주 한 병 무료',
         uploaderBenefitText: '음료 한 병 무료',
         usageCondition: '고기 3인분 이상 주문 시',
-        pinCode: '0000', // Mock PIN
+        pinCode: '0001', // Mock PIN
     }
 ]
 
