@@ -206,16 +206,11 @@ export default function CouponPage({ params }: PageProps) {
                             >
                                 카카오톡 공유
                             </button>
-                            <button
-                                className={`${styles.shareButton} ${styles.smsButton}`}
-                                onClick={handleCopyLink}
-                            >
-                                {linkCopied ? '복사 완료' : '링크 복사'}
-                            </button>
                         </div>
 
-                        <p className={styles.guideText}>
-                            이 화면을 캡처하거나 링크를 저장해주세요
+                        <p className="text-xs text-red-500 my-6 font-bold text-center">
+                            친구의 소중했던 경험을<br />
+                            직접 체험해보세요!
                         </p>
 
                         <div className={styles.buttonGroup}>
@@ -227,12 +222,6 @@ export default function CouponPage({ params }: PageProps) {
                             >
                                 {canUse ? '사용하기' : `${timeLeft} 후 사용 가능`}
                             </button>
-                            {!canUse && (
-                                <p className="text-xs text-red-500 mt-2 font-bold animate-pulse">
-                                    친구의 소중했던 경험을<br />
-                                    직접 체험해보세요!
-                                </p>
-                            )}
                         </div>
                     </>
                 )}
