@@ -35,12 +35,12 @@ export async function POST(request: Request) {
         const codeId = nanoid(8).toUpperCase()
         const couponId = `${storeId}-${codeId}`
 
-        // [TEST MODE] 테스트용: 즉시 활성화, 2분 유효기간
-        // - 활성화 시점: 즉시 (0초)
+        // [TEST MODE] 테스트용: 3시간 활성화, 2분 유효기간
+        // - 활성화 시점: 생성 + 3시간
         // - 유효기간: 2분
         const now = new Date()
-        const activatesAt = new Date(now.getTime()) // 즉시 활성화
-        const expirationPeriod = 2 * 60 * 1000 // 2분
+        const activatesAt = new Date(now.getTime() + 3 * 60 * 60 * 1000) // +3시간
+        const expirationPeriod = 2 * 60 * 1000 // 2분 (테스트용)
 
         let expiresAt: Date
 

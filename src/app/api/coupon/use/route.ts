@@ -23,11 +23,11 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Coupon already used' }, { status: 400 })
         }
 
-        // [TEST MODE] 활성화 체크: 즉시 사용 가능 (테스트용 0초)
+        // Activation Check: 쿠폰은 발급 3시간 후부터 사용 가능
         const issuedAt = new Date(coupon.issuedAt).getTime()
         const now = new Date().getTime()
-        const activationDelay = 0 // 즉시 활성화 (테스트용)
-        const isActivated = now - issuedAt >= activationDelay
+        const threeHours = 3 * 60 * 60 * 1000
+        const isActivated = now - issuedAt >= threeHours
 
         if (!isActivated) {
             return NextResponse.json({
