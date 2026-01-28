@@ -69,25 +69,20 @@ export default function CouponPage({ params }: PageProps) {
         })
     }, [params])
 
-    // Timer Logic
+    // Timer Logic - 활성화 시점(issuedAt + 3시간) 기준 카운트다운
     useEffect(() => {
         if (!coupon || mode !== 'view') return
 
         const checkTime = () => {
-            // Anchor to expiresAt from server
-            let expiryTime: number
-            if (coupon.expiresAt) {
-                expiryTime = new Date(coupon.expiresAt).getTime()
-            } else if (coupon.issuedAt) {
-                // Fallback for legacy data: issuedAt + 3h
-                expiryTime = new Date(coupon.issuedAt).getTime() + 3 * 60 * 60 * 1000
-            } else {
+            // 활성화 시점 = 발급시간 + 3시간
+            if (!coupon.issuedAt) {
                 setCanUse(true)
                 return
             }
 
+            const activationTime = new Date(coupon.issuedAt).getTime() + 3 * 60 * 60 * 1000
             const now = new Date().getTime()
-            const diff = expiryTime - now
+            const diff = activationTime - now
 
             if (diff <= 0) {
                 setCanUse(true)
