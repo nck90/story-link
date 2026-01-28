@@ -327,13 +327,17 @@ export default function StoreDetailPage({ params }: { params: Promise<{ storeId:
                         }}
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <h3 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '24px' }}>
+                        <h3 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '8px' }}>
                             🎫 쿠폰 수정: {editingCoupon.code}
                         </h3>
+                        <p style={{ fontSize: '13px', color: 'var(--color-gray-500)', marginBottom: '24px' }}>
+                            쿠폰 발급 후 <strong>3시간</strong> 뒤 활성화 → 활성화 후 <strong>2주간</strong> 사용 가능
+                        </p>
 
+                        {/* 발급 시점 (활성화 시간 결정) */}
                         <div style={{ marginBottom: '20px' }}>
                             <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, marginBottom: '8px', color: 'var(--color-gray-600)' }}>
-                                발급 시점 (활성화 = 발급 + 3시간)
+                                📅 발급 시점
                             </label>
                             <input
                                 type="datetime-local"
@@ -344,9 +348,15 @@ export default function StoreDetailPage({ params }: { params: Promise<{ storeId:
                                     padding: '12px',
                                     fontSize: '14px',
                                     border: '1px solid var(--color-gray-200)',
-                                    borderRadius: '8px'
+                                    borderRadius: '8px',
+                                    boxSizing: 'border-box'
                                 }}
                             />
+                            <div style={{ marginTop: '8px', fontSize: '12px', color: 'var(--color-gray-500)' }}>
+                                ⏰ 활성화 시점: <strong style={{ color: 'var(--color-primary)' }}>
+                                    {editIssuedAt ? new Date(new Date(editIssuedAt).getTime() + 3 * 60 * 60 * 1000).toLocaleString('ko-KR') : '-'}
+                                </strong>
+                            </div>
                             <button
                                 onClick={makeActivateNow}
                                 style={{
@@ -361,13 +371,14 @@ export default function StoreDetailPage({ params }: { params: Promise<{ storeId:
                                     cursor: 'pointer'
                                 }}
                             >
-                                ⚡ 즉시 활성화
+                                ⚡ 지금 바로 활성화 (발급시간 4시간 전으로 설정)
                             </button>
                         </div>
 
+                        {/* 유효기간 만료일 */}
                         <div style={{ marginBottom: '24px' }}>
                             <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, marginBottom: '8px', color: 'var(--color-gray-600)' }}>
-                                유효기간 만료일
+                                ⏳ 유효기간 만료일
                             </label>
                             <input
                                 type="datetime-local"
@@ -378,9 +389,36 @@ export default function StoreDetailPage({ params }: { params: Promise<{ storeId:
                                     padding: '12px',
                                     fontSize: '14px',
                                     border: '1px solid var(--color-gray-200)',
-                                    borderRadius: '8px'
+                                    borderRadius: '8px',
+                                    boxSizing: 'border-box'
                                 }}
                             />
+                            <div style={{ marginTop: '8px', fontSize: '12px', color: 'var(--color-gray-500)' }}>
+                                이 날짜가 지나면 쿠폰 사용 불가
+                            </div>
+                            <button
+                                onClick={() => {
+                                    // 활성화 시점 + 2주로 설정
+                                    if (editIssuedAt) {
+                                        const activationTime = new Date(editIssuedAt).getTime() + 3 * 60 * 60 * 1000
+                                        const twoWeeksLater = new Date(activationTime + 14 * 24 * 60 * 60 * 1000)
+                                        setEditExpiresAt(formatDateTimeLocal(twoWeeksLater.toISOString()))
+                                    }
+                                }}
+                                style={{
+                                    marginTop: '8px',
+                                    padding: '8px 16px',
+                                    background: 'var(--color-primary)',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '6px',
+                                    fontSize: '12px',
+                                    fontWeight: 600,
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                📆 기본값 적용 (활성화 + 2주)
+                            </button>
                         </div>
 
                         <div style={{ display: 'flex', gap: '12px' }}>
