@@ -23,11 +23,11 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Coupon already used' }, { status: 400 })
         }
 
-        // Activation Check: 쿠폰은 발급 3시간 후부터 사용 가능
+        // [TEST MODE] 활성화 체크: 즉시 사용 가능 (테스트용 0초)
         const issuedAt = new Date(coupon.issuedAt).getTime()
         const now = new Date().getTime()
-        const threeHours = 3 * 60 * 60 * 1000
-        const isActivated = now - issuedAt >= threeHours
+        const activationDelay = 0 // 즉시 활성화 (테스트용)
+        const isActivated = now - issuedAt >= activationDelay
 
         if (!isActivated) {
             return NextResponse.json({
@@ -54,12 +54,12 @@ export async function POST(request: Request) {
             },
         })
 
-        // 🔥 체인 유효기간 연장 로직
-        // 쿠폰 사용 시 연결된 체인의 모든 쿠폰 유효기간 +2주 연장
+        // 🔥 체인 유효기간 연장 로직 [TEST MODE: +2분]
+        // 쿠폰 사용 시 연결된 체인의 모든 쿠폰 유효기간 +2분 연장
         if (coupon.linkGenId && coupon.linkGen?.chainExpiresAt) {
-            const twoWeeksInMs = 14 * 24 * 60 * 60 * 1000
+            const extensionPeriod = 2 * 60 * 1000 // 2분 (테스트용)
             const currentChainExpiry = new Date(coupon.linkGen.chainExpiresAt).getTime()
-            const newChainExpiresAt = new Date(currentChainExpiry + twoWeeksInMs)
+            const newChainExpiresAt = new Date(currentChainExpiry + extensionPeriod)
 
             // LinkGen의 chainExpiresAt 업데이트
             await prisma.linkGen.update({

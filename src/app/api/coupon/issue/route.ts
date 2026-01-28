@@ -35,12 +35,12 @@ export async function POST(request: Request) {
         const codeId = nanoid(8).toUpperCase()
         const couponId = `${storeId}-${codeId}`
 
-        // Calculate expiration:
-        // - 활성화 시점: 생성 + 3시간
-        // - 유효기간: 활성화 시점 + 2주
+        // [TEST MODE] 테스트용: 즉시 활성화, 2분 유효기간
+        // - 활성화 시점: 즉시 (0초)
+        // - 유효기간: 2분
         const now = new Date()
-        const activatesAt = new Date(now.getTime() + 3 * 60 * 60 * 1000) // +3 hours
-        const twoWeeksInMs = 14 * 24 * 60 * 60 * 1000
+        const activatesAt = new Date(now.getTime()) // 즉시 활성화
+        const expirationPeriod = 2 * 60 * 1000 // 2분
 
         let expiresAt: Date
 
@@ -49,8 +49,8 @@ export async function POST(request: Request) {
             // 기존 체인 만료일 사용
             expiresAt = new Date(linkGen.chainExpiresAt)
         } else {
-            // 새 체인이면 활성화 시점 + 2주
-            expiresAt = new Date(activatesAt.getTime() + twoWeeksInMs)
+            // 새 체인이면 활성화 시점 + 2분
+            expiresAt = new Date(activatesAt.getTime() + expirationPeriod)
 
             // LinkGen에 chainExpiresAt 설정
             if (linkGenId) {
