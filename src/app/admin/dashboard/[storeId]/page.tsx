@@ -30,7 +30,28 @@ export default function StoreDetailPage({ params }: { params: Promise<{ storeId:
     const { storeId } = use(params)
     const [stats, setStats] = useState<AdminStats | null>(null)
     const [loading, setLoading] = useState(true)
+    const [editingCoupon, setEditingCoupon] = useState<CouponDetail | null>(null)
+    const [editIssuedAt, setEditIssuedAt] = useState('')
+    const [editExpiresAt, setEditExpiresAt] = useState('')
+    const [saving, setSaving] = useState(false)
     const router = useRouter()
+
+    const fetchStats = async () => {
+        const password = sessionStorage.getItem('admin_password')
+        try {
+            const res = await fetch(`/api/admin/stats?password=${password}&storeId=${storeId}`)
+            if (res.ok) {
+                const data = await res.json()
+                setStats(data)
+            } else {
+                router.push('/admin')
+            }
+        } catch (err) {
+            console.error('Fetch error:', err)
+        } finally {
+            setLoading(false)
+        }
+    }
 
     useEffect(() => {
         const password = sessionStorage.getItem('admin_password')
@@ -39,28 +60,55 @@ export default function StoreDetailPage({ params }: { params: Promise<{ storeId:
             return
         }
 
-        const fetchStats = async () => {
-            try {
-                const res = await fetch(`/api/admin/stats?password=${password}&storeId=${storeId}`)
-                if (res.ok) {
-                    const data = await res.json()
-                    setStats(data)
-                } else {
-                    router.push('/admin')
-                }
-            } catch (err) {
-                console.error('Fetch error:', err)
-            } finally {
-                setLoading(false)
-            }
-        }
-
         fetchStats()
         const interval = setInterval(fetchStats, 10000)
         return () => clearInterval(interval)
     }, [router])
 
     const storeData = stats?.breakdown.find(s => s.storeId === storeId)
+
+    const openEditModal = (coupon: CouponDetail) => {
+        setEditingCoupon(coupon)
+        setEditIssuedAt(formatDateTimeLocal(coupon.issuedAt))
+        setEditExpiresAt(coupon.expiresAt ? formatDateTimeLocal(coupon.expiresAt) : '')
+    }
+
+    const formatDateTimeLocal = (dateStr: string) => {
+        const date = new Date(dateStr)
+        const offset = date.getTimezoneOffset() * 60000
+        return new Date(date.getTime() - offset).toISOString().slice(0, 16)
+    }
+
+    const saveCouponEdit = async () => {
+        if (!editingCoupon) return
+        setSaving(true)
+        const password = sessionStorage.getItem('admin_password')
+
+        try {
+            const res = await fetch(`/api/admin/coupon/${editingCoupon.id}?password=${password}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    issuedAt: new Date(editIssuedAt).toISOString(),
+                    expiresAt: editExpiresAt ? new Date(editExpiresAt).toISOString() : null
+                })
+            })
+            if (res.ok) {
+                setEditingCoupon(null)
+                fetchStats()
+            }
+        } catch (err) {
+            console.error('Save error:', err)
+        } finally {
+            setSaving(false)
+        }
+    }
+
+    const makeActivateNow = () => {
+        // 즉시 활성화: issuedAt을 4시간 전으로 설정
+        const fourHoursAgo = new Date(Date.now() - 4 * 60 * 60 * 1000)
+        setEditIssuedAt(formatDateTimeLocal(fourHoursAgo.toISOString()))
+    }
 
     const getTimeDiff = (dateStr: string) => {
         const now = new Date()
@@ -196,14 +244,27 @@ export default function StoreDetailPage({ params }: { params: Promise<{ storeId:
                 <section className={styles.section}>
                     <div className={styles.sectionHeader}>
                         <h3 className={styles.sectionTitle}>개별 쿠폰 상세 내역</h3>
-                        <p className={styles.sectionDesc}>최근 발행된 쿠폰부터 순차적으로 표시됩니다.</p>
+                        <p className={styles.sectionDesc}>쿠폰 카드를 클릭하여 개별 수정할 수 있습니다.</p>
                     </div>
 
                     <div className={styles.couponGrid}>
                         {storeData.couponDetails.length > 0 ? storeData.couponDetails.map((c, i) => {
                             const status = getStatusLabel(c.status)
                             return (
-                                <div key={i} className={styles.couponCard}>
+                                <div
+                                    key={i}
+                                    className={styles.couponCard}
+                                    onClick={() => openEditModal(c)}
+                                    style={{ cursor: 'pointer', transition: 'transform 0.2s, box-shadow 0.2s' }}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.transform = 'translateY(-2px)'
+                                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)'
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.transform = ''
+                                        e.currentTarget.style.boxShadow = ''
+                                    }}
+                                >
                                     <div className={styles.couponHeader}>
                                         <span className={styles.couponCode}>{c.code}</span>
                                         <span className={`${styles.statusTag} ${status.class}`}>{status.label}</span>
@@ -224,6 +285,9 @@ export default function StoreDetailPage({ params }: { params: Promise<{ storeId:
                                             </span>
                                         </div>
                                     </div>
+                                    <div style={{ marginTop: '12px', fontSize: '11px', color: 'var(--color-gray-400)', textAlign: 'center' }}>
+                                        ✏️ 클릭하여 수정
+                                    </div>
                                 </div>
                             )
                         }) : (
@@ -234,6 +298,130 @@ export default function StoreDetailPage({ params }: { params: Promise<{ storeId:
                     </div>
                 </section>
             </main>
+
+            {/* 쿠폰 수정 모달 */}
+            {editingCoupon && (
+                <div
+                    style={{
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: 'rgba(0,0,0,0.5)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        zIndex: 1000
+                    }}
+                    onClick={() => setEditingCoupon(null)}
+                >
+                    <div
+                        style={{
+                            background: 'white',
+                            borderRadius: '16px',
+                            padding: '32px',
+                            width: '90%',
+                            maxWidth: '480px',
+                            boxShadow: '0 20px 40px rgba(0,0,0,0.2)'
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <h3 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '24px' }}>
+                            🎫 쿠폰 수정: {editingCoupon.code}
+                        </h3>
+
+                        <div style={{ marginBottom: '20px' }}>
+                            <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, marginBottom: '8px', color: 'var(--color-gray-600)' }}>
+                                발급 시점 (활성화 = 발급 + 3시간)
+                            </label>
+                            <input
+                                type="datetime-local"
+                                value={editIssuedAt}
+                                onChange={(e) => setEditIssuedAt(e.target.value)}
+                                style={{
+                                    width: '100%',
+                                    padding: '12px',
+                                    fontSize: '14px',
+                                    border: '1px solid var(--color-gray-200)',
+                                    borderRadius: '8px'
+                                }}
+                            />
+                            <button
+                                onClick={makeActivateNow}
+                                style={{
+                                    marginTop: '8px',
+                                    padding: '8px 16px',
+                                    background: 'var(--color-success)',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '6px',
+                                    fontSize: '12px',
+                                    fontWeight: 600,
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                ⚡ 즉시 활성화
+                            </button>
+                        </div>
+
+                        <div style={{ marginBottom: '24px' }}>
+                            <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, marginBottom: '8px', color: 'var(--color-gray-600)' }}>
+                                유효기간 만료일
+                            </label>
+                            <input
+                                type="datetime-local"
+                                value={editExpiresAt}
+                                onChange={(e) => setEditExpiresAt(e.target.value)}
+                                style={{
+                                    width: '100%',
+                                    padding: '12px',
+                                    fontSize: '14px',
+                                    border: '1px solid var(--color-gray-200)',
+                                    borderRadius: '8px'
+                                }}
+                            />
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '12px' }}>
+                            <button
+                                onClick={() => setEditingCoupon(null)}
+                                style={{
+                                    flex: 1,
+                                    padding: '12px',
+                                    background: 'var(--color-gray-100)',
+                                    color: 'var(--color-gray-600)',
+                                    border: 'none',
+                                    borderRadius: '8px',
+                                    fontSize: '14px',
+                                    fontWeight: 600,
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                취소
+                            </button>
+                            <button
+                                onClick={saveCouponEdit}
+                                disabled={saving}
+                                style={{
+                                    flex: 1,
+                                    padding: '12px',
+                                    background: 'var(--color-primary)',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '8px',
+                                    fontSize: '14px',
+                                    fontWeight: 600,
+                                    cursor: 'pointer',
+                                    opacity: saving ? 0.7 : 1
+                                }}
+                            >
+                                {saving ? '저장 중...' : '저장'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }
