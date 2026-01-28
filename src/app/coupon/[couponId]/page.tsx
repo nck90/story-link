@@ -210,7 +210,7 @@ export default function CouponPage({ params }: PageProps) {
                                 className={`${styles.shareButton} ${styles.kakaoButton}`}
                                 onClick={handleKakaoShare}
                             >
-                                카카오톡 공유
+                                공유 (필수)
                             </button>
                         </div>
 
