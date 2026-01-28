@@ -20,11 +20,12 @@ export async function POST(request: Request) {
         }
 
         // Verify if linkGenId exists in DB before linking
+        let linkGen = null
         if (linkGenId) {
-            const exists = await prisma.linkGen.findUnique({
+            linkGen = await prisma.linkGen.findUnique({
                 where: { id: linkGenId }
             })
-            if (!exists) {
+            if (!linkGen) {
                 console.warn(`LinkGen ID ${linkGenId} not found. Issuing unlinked coupon.`)
                 linkGenId = null
             }
@@ -34,9 +35,31 @@ export async function POST(request: Request) {
         const codeId = nanoid(8).toUpperCase()
         const couponId = `${storeId}-${codeId}`
 
-        // Calculate expiration (3 hours from now)
+        // Calculate expiration:
+        // - 활성화 시점: 생성 + 3시간
+        // - 유효기간: 활성화 시점 + 2주
         const now = new Date()
-        const expiresAt = new Date(now.getTime() + 3 * 60 * 60 * 1000)
+        const activatesAt = new Date(now.getTime() + 3 * 60 * 60 * 1000) // +3 hours
+        const twoWeeksInMs = 14 * 24 * 60 * 60 * 1000
+
+        let expiresAt: Date
+
+        // 체인 유효기간 로직
+        if (linkGen?.chainExpiresAt) {
+            // 기존 체인 만료일 사용
+            expiresAt = new Date(linkGen.chainExpiresAt)
+        } else {
+            // 새 체인이면 활성화 시점 + 2주
+            expiresAt = new Date(activatesAt.getTime() + twoWeeksInMs)
+
+            // LinkGen에 chainExpiresAt 설정
+            if (linkGenId) {
+                await prisma.linkGen.update({
+                    where: { id: linkGenId },
+                    data: { chainExpiresAt: expiresAt }
+                })
+            }
+        }
 
         const coupon = await prisma.coupon.create({
             data: {

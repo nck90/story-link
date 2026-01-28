@@ -9,12 +9,13 @@ datasource db {
 
 
 model LinkGen {
-  id        String   @id @default(uuid())
-  storeSlug String
-  ipAddress String?
-  createdAt DateTime @default(now())
+  id             String    @id @default(uuid())
+  storeSlug      String
+  ipAddress      String?
+  createdAt      DateTime  @default(now())
+  chainExpiresAt DateTime? // 체인 전체의 만료일 (동일 LinkGen의 모든 쿠폰이 공유)
   
-  coupons   Coupon[]
+  coupons        Coupon[]
 }
 
 model Coupon {
