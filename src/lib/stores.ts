@@ -11,6 +11,7 @@ export interface Store {
     uploaderBenefitText?: string
     usageCondition: string
     pinCode: string // Mock PIN for verification
+    address: string // Store address
 }
 
 export const STORES: Store[] = [
@@ -43,6 +44,7 @@ export const STORES: Store[] = [
         uploaderBenefitText: '음료 한 병 무료',
         usageCondition: '고기 3인분 이상 주문 시',
         pinCode: '0001', // Mock PIN
+        address: '부산광역시 동래구 온천천로431번길 4-1 (안락동 632-124)',
     }
 ]
 

@@ -197,6 +197,36 @@ function StorePageClient({ store, isFromStory, storyLinkId }: StorePageClientPro
                     <p className={styles.conditionText}>{store.usageCondition}</p>
                 </div>
 
+                {/* Address Section */}
+                <div className="mb-8 p-5 bg-white rounded-xl border border-gray-100 shadow-sm">
+                    <h3 className="text-sm font-bold text-gray-900 mb-2 flex items-center gap-2">
+                        📍 매장 위치
+                    </h3>
+                    <p className="text-sm text-gray-600 mb-3 leading-relaxed">
+                        {store.address || '주소 정보가 없습니다.'}
+                    </p>
+                    <button
+                        onClick={() => {
+                            if (store.address) {
+                                navigator.clipboard.writeText(store.address)
+                                // 간단한 토스트나 알림 대신 버튼 텍스트 변경 등으로 피드백
+                                const btn = document.getElementById('addr-copy-btn')
+                                if (btn) {
+                                    const originalText = btn.innerText
+                                    btn.innerText = '✅ 복사 완료'
+                                    setTimeout(() => {
+                                        btn.innerText = originalText
+                                    }, 2000)
+                                }
+                            }
+                        }}
+                        id="addr-copy-btn"
+                        className="w-full py-2.5 px-4 bg-gray-50 hover:bg-gray-100 text-gray-700 text-xs font-bold rounded-lg border border-gray-200 transition-colors flex items-center justify-center gap-1"
+                    >
+                        📋 주소 복사하기
+                    </button>
+                </div>
+
                 {/* Visitor Info Text for 7-3 */}
                 {isFromStory && (
                     <div className="text-center mb-8 bg-gray-50 p-4 rounded-lg">
@@ -210,6 +240,8 @@ function StorePageClient({ store, isFromStory, storyLinkId }: StorePageClientPro
                 {/* Gallery */}
                 <div className={styles.gallerySection}>
                     <h3 className={styles.sectionTitle}>매장 둘러보기</h3>
+
+                    {/* ... gallery items (no changes needed here but including context for replace) ... */}
                     <div className={styles.galleryScroll}>
                         {store.images.map((img, idx) => (
                             <div key={idx} className={styles.galleryItem}>
