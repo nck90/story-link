@@ -32,3 +32,10 @@ model Coupon {
   linkGenId String?
   linkGen   LinkGen? @relation(fields: [linkGenId], references: [id])
 }
+
+model Settings {
+  id                   String @id @default("default")
+  activationHours      Int    @default(3)      // 쿠폰 활성화 시간 (시간)
+  expirationDays       Int    @default(14)     // 쿠폰 유효기간 (일)
+  chainExtensionDays   Int    @default(14)     // 체인 연장 기간 (일)
+}

@@ -29,8 +29,16 @@ interface AdminStats {
     breakdown: StoreStat[]
 }
 
+interface Settings {
+    activationHours: number
+    expirationDays: number
+    chainExtensionDays: number
+}
+
 export default function AdminDashboardPage() {
     const [stats, setStats] = useState<AdminStats | null>(null)
+    const [settings, setSettings] = useState<Settings>({ activationHours: 3, expirationDays: 14, chainExtensionDays: 14 })
+    const [settingsSaved, setSettingsSaved] = useState(false)
     const [loading, setLoading] = useState(true)
     const router = useRouter()
 
@@ -57,10 +65,40 @@ export default function AdminDashboardPage() {
             }
         }
 
+        const fetchSettings = async () => {
+            try {
+                const res = await fetch(`/api/admin/settings?password=${password}`)
+                if (res.ok) {
+                    const data = await res.json()
+                    setSettings(data)
+                }
+            } catch (err) {
+                console.error('Settings fetch error:', err)
+            }
+        }
+
         fetchStats()
+        fetchSettings()
         const interval = setInterval(fetchStats, 10000)
         return () => clearInterval(interval)
     }, [router])
+
+    const saveSettings = async () => {
+        const password = sessionStorage.getItem('admin_password')
+        try {
+            const res = await fetch(`/api/admin/settings?password=${password}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(settings)
+            })
+            if (res.ok) {
+                setSettingsSaved(true)
+                setTimeout(() => setSettingsSaved(false), 2000)
+            }
+        } catch (err) {
+            console.error('Settings save error:', err)
+        }
+    }
 
     if (loading && !stats) {
         return (
@@ -125,6 +163,103 @@ export default function AdminDashboardPage() {
             </header>
 
             <main className={styles.main}>
+                {/* 설정 패널 */}
+                <section className={styles.section} style={{ marginBottom: '40px' }}>
+                    <div className={styles.sectionHeader}>
+                        <h2 className={styles.sectionTitle}>⚙️ 쿠폰 설정</h2>
+                        <p className={styles.sectionDesc}>쿠폰 활성화 시간 및 유효기간 설정</p>
+                    </div>
+
+                    <div className={styles.kpiGrid}>
+                        <div className={styles.kpiCard}>
+                            <label className={styles.kpiLabel}>활성화 시간</label>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px' }}>
+                                <input
+                                    type="number"
+                                    value={settings.activationHours}
+                                    onChange={(e) => setSettings({ ...settings, activationHours: Number(e.target.value) })}
+                                    style={{
+                                        width: '80px',
+                                        padding: '8px 12px',
+                                        fontSize: '24px',
+                                        fontWeight: 700,
+                                        border: '1px solid var(--color-gray-200)',
+                                        borderRadius: '8px',
+                                        textAlign: 'center'
+                                    }}
+                                    min={0}
+                                />
+                                <span style={{ fontSize: '16px', color: 'var(--color-gray-600)' }}>시간</span>
+                            </div>
+                            <div className={styles.kpiSub}>쿠폰 발급 후 사용 가능 시점</div>
+                        </div>
+
+                        <div className={styles.kpiCard}>
+                            <label className={styles.kpiLabel}>유효기간</label>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px' }}>
+                                <input
+                                    type="number"
+                                    value={settings.expirationDays}
+                                    onChange={(e) => setSettings({ ...settings, expirationDays: Number(e.target.value) })}
+                                    style={{
+                                        width: '80px',
+                                        padding: '8px 12px',
+                                        fontSize: '24px',
+                                        fontWeight: 700,
+                                        border: '1px solid var(--color-gray-200)',
+                                        borderRadius: '8px',
+                                        textAlign: 'center'
+                                    }}
+                                    min={1}
+                                />
+                                <span style={{ fontSize: '16px', color: 'var(--color-gray-600)' }}>일</span>
+                            </div>
+                            <div className={styles.kpiSub}>쿠폰 만료까지 기간</div>
+                        </div>
+
+                        <div className={styles.kpiCard}>
+                            <label className={styles.kpiLabel}>체인 연장 기간</label>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px' }}>
+                                <input
+                                    type="number"
+                                    value={settings.chainExtensionDays}
+                                    onChange={(e) => setSettings({ ...settings, chainExtensionDays: Number(e.target.value) })}
+                                    style={{
+                                        width: '80px',
+                                        padding: '8px 12px',
+                                        fontSize: '24px',
+                                        fontWeight: 700,
+                                        border: '1px solid var(--color-gray-200)',
+                                        borderRadius: '8px',
+                                        textAlign: 'center'
+                                    }}
+                                    min={1}
+                                />
+                                <span style={{ fontSize: '16px', color: 'var(--color-gray-600)' }}>일</span>
+                            </div>
+                            <div className={styles.kpiSub}>사용 시 체인 연장 기간</div>
+                        </div>
+                    </div>
+
+                    <button
+                        onClick={saveSettings}
+                        style={{
+                            marginTop: '20px',
+                            padding: '12px 32px',
+                            background: settingsSaved ? 'var(--color-success)' : 'var(--color-primary)',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '8px',
+                            fontSize: '14px',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            transition: 'all 0.2s'
+                        }}
+                    >
+                        {settingsSaved ? '✓ 저장 완료!' : '설정 저장'}
+                    </button>
+                </section>
+
                 <section className={styles.section}>
                     <div className={styles.sectionHeader}>
                         <h2 className={styles.sectionTitle}>전체 비즈니스 성과</h2>
@@ -246,3 +381,4 @@ const StoreRow = memo(({ store, onClick }: { store: StoreStat, onClick: () => vo
 })
 
 StoreRow.displayName = 'StoreRow'
+

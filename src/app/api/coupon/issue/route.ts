@@ -19,6 +19,11 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
         }
 
+        // DB에서 설정값 가져오기
+        const settings = await prisma.settings.findUnique({ where: { id: 'default' } })
+        const activationHours = settings?.activationHours ?? 3
+        const expirationDays = settings?.expirationDays ?? 14
+
         // Verify if linkGenId exists in DB before linking
         let linkGen = null
         if (linkGenId) {
@@ -35,12 +40,10 @@ export async function POST(request: Request) {
         const codeId = nanoid(8).toUpperCase()
         const couponId = `${storeId}-${codeId}`
 
-        // [TEST MODE] 테스트용: 3시간 활성화, 2분 유효기간
-        // - 활성화 시점: 생성 + 3시간
-        // - 유효기간: 2분
+        // 활성화 시점 및 유효기간 계산 (설정값 기반)
         const now = new Date()
-        const activatesAt = new Date(now.getTime() + 3 * 60 * 60 * 1000) // +3시간
-        const expirationPeriod = 2 * 60 * 1000 // 2분 (테스트용)
+        const activatesAt = new Date(now.getTime() + activationHours * 60 * 60 * 1000)
+        const expirationMs = expirationDays * 24 * 60 * 60 * 1000
 
         let expiresAt: Date
 
@@ -49,8 +52,8 @@ export async function POST(request: Request) {
             // 기존 체인 만료일 사용
             expiresAt = new Date(linkGen.chainExpiresAt)
         } else {
-            // 새 체인이면 활성화 시점 + 2분
-            expiresAt = new Date(activatesAt.getTime() + expirationPeriod)
+            // 새 체인이면 활성화 시점 + 유효기간
+            expiresAt = new Date(activatesAt.getTime() + expirationMs)
 
             // LinkGen에 chainExpiresAt 설정
             if (linkGenId) {
