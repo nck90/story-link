@@ -219,6 +219,34 @@ export default function CouponPage({ params }: PageProps) {
                             직접 체험해보세요!
                         </p>
 
+                        {/* 사용 가능 상태일 때만 유효기간 표시 */}
+                        {canUse && coupon.expiresAt && (
+                            <div className="text-sm text-gray-500 mb-6 bg-gray-50 py-3 px-4 rounded-lg text-center" style={{ margin: '0 20px 24px' }}>
+                                <p style={{ fontSize: '13px', marginBottom: '4px' }}>유효기간: {new Date(coupon.expiresAt).toLocaleString('ko-KR', {
+                                    month: 'long',
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                })}</p>
+                                <p className="text-xs text-red-500 font-bold">
+                                    {(() => {
+                                        const now = new Date().getTime()
+                                        const expiry = new Date(coupon.expiresAt).getTime()
+                                        const diff = expiry - now
+
+                                        if (diff <= 0) return '만료된 쿠폰입니다'
+
+                                        const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+                                        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+                                        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
+
+                                        if (days > 0) return `⏰ ${days}일 ${hours}시간 남음`
+                                        return `⏰ ${hours}시간 ${minutes}분 남음`
+                                    })()}
+                                </p>
+                            </div>
+                        )}
+
                         <div className={styles.buttonGroup}>
                             <button
                                 className={`btn btn-primary ${!canUse ? 'opacity-50 cursor-not-allowed' : ''}`}
@@ -246,35 +274,7 @@ export default function CouponPage({ params }: PageProps) {
                 {mode === 'use' && (
                     <>
                         <div className={styles.pinInputContainer}>
-                            <p className="font-bold mb-2 text-lg">직원 확인 후 눌러주세요</p>
-
-                            {/* 만료 시간 표시 */}
-                            {coupon.expiresAt && (
-                                <div className="text-sm text-gray-500 mb-6 bg-gray-50 py-2 px-4 rounded-lg">
-                                    <p>유효기간: {new Date(coupon.expiresAt).toLocaleString('ko-KR', {
-                                        month: 'long',
-                                        day: 'numeric',
-                                        hour: '2-digit',
-                                        minute: '2-digit'
-                                    })}</p>
-                                    <p className="text-xs text-red-500 mt-1 font-medium">
-                                        {(() => {
-                                            const now = new Date().getTime()
-                                            const expiry = new Date(coupon.expiresAt).getTime()
-                                            const diff = expiry - now
-
-                                            if (diff <= 0) return '만료된 쿠폰입니다'
-
-                                            const days = Math.floor(diff / (1000 * 60 * 60 * 24))
-                                            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
-                                            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
-
-                                            if (days > 0) return `${days}일 ${hours}시간 남음`
-                                            return `${hours}시간 ${minutes}분 남음`
-                                        })()}
-                                    </p>
-                                </div>
-                            )}
+                            <p className="font-bold mb-8 text-lg">직원 확인 후 눌러주세요</p>
 
                             <input
                                 type="tel"
