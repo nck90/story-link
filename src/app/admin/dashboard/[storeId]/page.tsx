@@ -357,22 +357,26 @@ export default function StoreDetailPage({ params }: { params: Promise<{ storeId:
                                     {editIssuedAt ? new Date(new Date(editIssuedAt).getTime() + 3 * 60 * 60 * 1000).toLocaleString('ko-KR') : '-'}
                                 </strong>
                             </div>
-                            <button
-                                onClick={makeActivateNow}
-                                style={{
-                                    marginTop: '8px',
-                                    padding: '8px 16px',
-                                    background: 'var(--color-success)',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: '6px',
-                                    fontSize: '12px',
-                                    fontWeight: 600,
-                                    cursor: 'pointer'
-                                }}
-                            >
-                                ⚡ 지금 바로 활성화 (발급시간 4시간 전으로 설정)
-                            </button>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px' }}>
+                                <button
+                                    onClick={makeActivateNow}
+                                    style={{
+                                        padding: '8px 16px',
+                                        background: 'var(--color-success)',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '6px',
+                                        fontSize: '12px',
+                                        fontWeight: 600,
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    ⚡ 지금 바로 활성화
+                                </button>
+                                <span style={{ fontSize: '11px', color: 'var(--color-warning)', fontWeight: 500 }}>
+                                    ⚠️ 주의: 발급 시간이 4시간 전으로 변경됩니다.
+                                </span>
+                            </div>
                         </div>
 
                         {/* 유효기간 만료일 */}
@@ -396,29 +400,49 @@ export default function StoreDetailPage({ params }: { params: Promise<{ storeId:
                             <div style={{ marginTop: '8px', fontSize: '12px', color: 'var(--color-gray-500)' }}>
                                 이 날짜가 지나면 쿠폰 사용 불가
                             </div>
-                            <button
-                                onClick={() => {
-                                    // 활성화 시점 + 2주로 설정
-                                    if (editIssuedAt) {
-                                        const activationTime = new Date(editIssuedAt).getTime() + 3 * 60 * 60 * 1000
-                                        const twoWeeksLater = new Date(activationTime + 14 * 24 * 60 * 60 * 1000)
-                                        setEditExpiresAt(formatDateTimeLocal(twoWeeksLater.toISOString()))
-                                    }
-                                }}
-                                style={{
-                                    marginTop: '8px',
-                                    padding: '8px 16px',
-                                    background: 'var(--color-primary)',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: '6px',
-                                    fontSize: '12px',
-                                    fontWeight: 600,
-                                    cursor: 'pointer'
-                                }}
-                            >
-                                📆 기본값 적용 (활성화 + 2주)
-                            </button>
+                            <div style={{ display: 'flex', gap: '8px', marginTop: '8px', flexWrap: 'wrap' }}>
+                                <button
+                                    onClick={() => {
+                                        // 활성화 시점 + 2주로 설정
+                                        if (editIssuedAt) {
+                                            const activationTime = new Date(editIssuedAt).getTime() + 3 * 60 * 60 * 1000
+                                            const twoWeeksLater = new Date(activationTime + 14 * 24 * 60 * 60 * 1000)
+                                            setEditExpiresAt(formatDateTimeLocal(twoWeeksLater.toISOString()))
+                                        }
+                                    }}
+                                    style={{
+                                        padding: '8px 12px',
+                                        background: 'var(--color-primary)',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '6px',
+                                        fontSize: '12px',
+                                        fontWeight: 600,
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    📆 기본값 (활성화 + 2주)
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        // 현재 시간 + 2분으로 설정 (테스트용)
+                                        const twoMinsLater = new Date(Date.now() + 2 * 60 * 1000)
+                                        setEditExpiresAt(formatDateTimeLocal(twoMinsLater.toISOString()))
+                                    }}
+                                    style={{
+                                        padding: '8px 12px',
+                                        background: 'var(--color-error)',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '6px',
+                                        fontSize: '12px',
+                                        fontWeight: 600,
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    🧪 2분 뒤 만료 (테스트)
+                                </button>
+                            </div>
                         </div>
 
                         <div style={{ display: 'flex', gap: '12px' }}>
