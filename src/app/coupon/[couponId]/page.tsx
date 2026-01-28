@@ -69,19 +69,30 @@ export default function CouponPage({ params }: PageProps) {
         })
     }, [params])
 
-    // Timer Logic - 활성화 시점(issuedAt + 3시간) 기준 카운트다운
+    // Timer Logic - 활성화 시점(issuedAt + 3시간) 및 만료 시점 체크
     useEffect(() => {
         if (!coupon || mode !== 'view') return
 
         const checkTime = () => {
-            // 활성화 시점 = 발급시간 + 3시간
+            const now = new Date().getTime()
+
+            // 1. 만료 체크
+            if (coupon.expiresAt) {
+                const expiryTime = new Date(coupon.expiresAt).getTime()
+                if (now > expiryTime) {
+                    setCanUse(false)
+                    setTimeLeft('expired') // 특별한 상태 값
+                    return
+                }
+            }
+
+            // 2. 활성화 체크 (발급 후 3시간)
             if (!coupon.issuedAt) {
                 setCanUse(true)
                 return
             }
 
             const activationTime = new Date(coupon.issuedAt).getTime() + 3 * 60 * 60 * 1000
-            const now = new Date().getTime()
             const diff = activationTime - now
 
             if (diff <= 0) {
@@ -213,9 +224,20 @@ export default function CouponPage({ params }: PageProps) {
                                 className={`btn btn-primary ${!canUse ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 onClick={handleUseClick}
                                 disabled={!canUse}
-                                style={{ height: '56px', fontSize: '16px', fontWeight: 700 }}
+                                style={{
+                                    height: '56px',
+                                    fontSize: '16px',
+                                    fontWeight: 700,
+                                    backgroundColor: timeLeft === 'expired' ? 'var(--color-gray-400)' : undefined,
+                                    borderColor: timeLeft === 'expired' ? 'var(--color-gray-400)' : undefined
+                                }}
                             >
-                                {canUse ? '사용하기' : `${timeLeft} 후 사용 가능`}
+                                {timeLeft === 'expired'
+                                    ? '만료됨'
+                                    : canUse
+                                        ? '사용하기'
+                                        : `${timeLeft} 후 사용 가능`
+                                }
                             </button>
                         </div>
                     </>
@@ -224,7 +246,36 @@ export default function CouponPage({ params }: PageProps) {
                 {mode === 'use' && (
                     <>
                         <div className={styles.pinInputContainer}>
-                            <p className="font-bold mb-8 text-lg">직원 확인 후 눌러주세요</p>
+                            <p className="font-bold mb-2 text-lg">직원 확인 후 눌러주세요</p>
+
+                            {/* 만료 시간 표시 */}
+                            {coupon.expiresAt && (
+                                <div className="text-sm text-gray-500 mb-6 bg-gray-50 py-2 px-4 rounded-lg">
+                                    <p>유효기간: {new Date(coupon.expiresAt).toLocaleString('ko-KR', {
+                                        month: 'long',
+                                        day: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                    })}</p>
+                                    <p className="text-xs text-red-500 mt-1 font-medium">
+                                        {(() => {
+                                            const now = new Date().getTime()
+                                            const expiry = new Date(coupon.expiresAt).getTime()
+                                            const diff = expiry - now
+
+                                            if (diff <= 0) return '만료된 쿠폰입니다'
+
+                                            const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+                                            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+                                            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
+
+                                            if (days > 0) return `${days}일 ${hours}시간 남음`
+                                            return `${hours}시간 ${minutes}분 남음`
+                                        })()}
+                                    </p>
+                                </div>
+                            )}
+
                             <input
                                 type="tel"
                                 className={styles.pinInput}
