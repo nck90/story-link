@@ -192,7 +192,7 @@ export default function CouponPage({ params }: PageProps) {
     return (
         <div className={styles.page}>
             <div className={styles.card}>
-                <p className={styles.storeName}>온천천 먹음직</p>
+                <p className={styles.storeName}>먹음직(온천천 점)</p>
                 <h1 className={styles.title}>방문 시, 쿠폰 혜택</h1>
                 <p className="text-sm text-gray-500 mb-6 font-medium">
                     {coupon.benefit}

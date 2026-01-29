@@ -35,11 +35,17 @@ export async function generateMetadata({ params }: PageProps) {
     const store = getStoreBySlug(storeSlug)
 
     if (!store) {
-        return { title: 'Reply' }
+        return { title: 'Story Link' }
     }
 
     return {
-        title: `${store.name} | Reply`,
+        title: `${store.name} | Story Link`,
         description: store.description || `${store.name}의 특별한 혜택을 확인하세요`,
+        openGraph: {
+            title: `${store.name} - Story Link`,
+            description: store.description,
+            url: `https://story-link-silk.vercel.app/s/${storeSlug}`,
+            images: store.images[0] ? [store.images[0]] : [],
+        }
     }
 }
