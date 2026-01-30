@@ -267,3 +267,85 @@
     color: var(--color-primary);
     font-weight: 600;
 }
+
+/* UI Enhancements */
+.backButton {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: background 0.2s ease;
+}
+
+.backButton:active {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.tabContainer {
+    display: flex;
+    border-bottom: 1px solid #f3f4f6;
+    background: #ffffff;
+    position: sticky;
+    top: 0;
+    z-index: 40;
+}
+
+.tabItem {
+    flex: 1;
+    padding: 1rem;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: #9ca3af;
+    text-align: center;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.tabActive {
+    color: #111827;
+    border-bottom-color: #FF4F00;
+}
+
+.menuGridSection {
+    padding: 24px;
+    padding-bottom: 100px;
+}
+
+.menuGrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.menuItem {
+    flex: 0 0 calc(50% - 6px);
+    aspect-ratio: 3/4;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #f3f4f6;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.menuItem:active {
+    transform: scale(0.98);
+}
+
+.emptyState {
+    text-align: center;
+    padding: 60px 20px;
+    color: #9ca3af;
+    background-color: #f9fafb;
+    border-radius: 12px;
+    font-size: 0.875rem;
+}

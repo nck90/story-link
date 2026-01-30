@@ -192,7 +192,7 @@ export default function CouponPage({ params }: PageProps) {
     return (
         <div className={styles.page}>
             <div className={styles.card}>
-                <p className={styles.storeName}>먹음직(온천천 점)</p>
+                <p className={styles.storeName}>{coupon.storeName}</p>
                 <h1 className={styles.title}>방문 시, 쿠폰 혜택</h1>
                 <p className="text-sm text-gray-500 mb-6 font-medium">
                     {coupon.benefit}
@@ -210,7 +210,7 @@ export default function CouponPage({ params }: PageProps) {
                                 className={`${styles.shareButton} ${styles.kakaoButton}`}
                                 onClick={handleKakaoShare}
                             >
-                                공유 (필수)
+                                카카오톡 나에게 공유(필수)
                             </button>
                         </div>
 

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://story-link-silk.vercel.app/"),
   title: "Story Link - 인스타 스토리로 쿠폰 받기",
   description: "인스타그램 스토리 링크를 통해 가게 방문 쿠폰을 발급받으세요",
   openGraph: {

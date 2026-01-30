@@ -17,7 +17,7 @@ function StorePageClient({ store, isFromStory, storyLinkId }: StorePageClientPro
     const [loading, setLoading] = useState(false)
     const [generatedLink, setGeneratedLink] = useState<string | null>(null)
     const [copied, setCopied] = useState(false)
-    const [viewMode, setViewMode] = useState<'landing' | 'link_created'>('landing')
+    const [viewMode, setViewMode] = useState<'landing' | 'link_created' | 'menu'>('landing')
     const [logoClicks, setLogoClicks] = useState(0)
 
     const handleLogoClick = () => {
@@ -157,6 +157,17 @@ function StorePageClient({ store, isFromStory, storyLinkId }: StorePageClientPro
         <div className={styles.container}>
             {/* Hero Section */}
             <div className={styles.heroImageWrapper}>
+                {/* Back Button */}
+                <button
+                    onClick={() => router.back()}
+                    className={styles.backButton}
+                    aria-label="Back"
+                >
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M15 18L9 12L15 6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                </button>
+
                 <img
                     src={store.images[0]}
                     alt={store.name}
@@ -178,84 +189,121 @@ function StorePageClient({ store, isFromStory, storyLinkId }: StorePageClientPro
                 </div>
             </div>
 
-            {/* Content Section */}
-            <div className={styles.contentSection}>
-                {/* Description first per PRD 7-3 "Store Intro" */}
-                {/* Actually PRD 7-3 says: Image -> Intro -> Benefit -> Condition -> "Friend's text" -> Button */}
-                {/* Let's follow that order generally, but visual hierarchy matters. */}
+            {/* Tabs */}
+            <div className={styles.tabContainer}>
+                <button
+                    className={`${styles.tabItem} ${viewMode === 'landing' ? styles.tabActive : ''}`}
+                    onClick={() => setViewMode('landing')}
+                >
+                    홈
+                </button>
+                <button
+                    className={`${styles.tabItem} ${viewMode === 'menu' ? styles.tabActive : ''}`}
+                    onClick={() => setViewMode('menu')}
+                >
+                    메뉴
+                </button>
+            </div>
 
-                <div className="mb-6">
-                    <p className="text-sm text-gray-800 leading-relaxed font-medium">
-                        {store.description}
-                    </p>
+            {viewMode === 'menu' ? (
+                /* Menu Tab Content */
+                <div className={styles.menuGridSection}>
+                    <h3 className={styles.sectionTitle}>메뉴판</h3>
+                    {store.menus && store.menus.length > 0 ? (
+                        <div className={styles.menuGrid}>
+                            {store.menus.map((img, idx) => (
+                                <div key={idx} className={styles.menuItem} onClick={() => window.open(img, '_blank')}>
+                                    <img src={img} alt={`Menu ${idx}`} className={styles.galleryImage} />
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className={styles.emptyState}>
+                            메뉴 정보가 준비 중입니다.
+                        </div>
+                    )}
                 </div>
-
-                {/* Benefits */}
-                <div className={styles.benefitCard}>
-                    <span className={styles.benefitLabel}>혜택 상세</span>
-                    <p className={styles.benefitText}>{store.benefitText}</p>
-                    <p className={styles.conditionText}>{store.usageCondition}</p>
-                </div>
-
-                {/* Address Section */}
-                <div className="mb-8 p-5 bg-white rounded-xl border border-gray-100 shadow-sm">
-                    <h3 className="text-sm font-bold text-gray-900 mb-2 flex items-center gap-2">
-                        📍 매장 위치
-                    </h3>
-                    <p className="text-sm text-gray-600 mb-3 leading-relaxed">
-                        {store.address || '주소 정보가 없습니다.'}
-                    </p>
-                    <button
-                        onClick={() => {
-                            if (store.address) {
-                                navigator.clipboard.writeText(store.address)
-                                // 간단한 토스트나 알림 대신 버튼 텍스트 변경 등으로 피드백
-                                const btn = document.getElementById('addr-copy-btn')
-                                if (btn) {
-                                    const originalText = btn.innerText
-                                    btn.innerText = '✅ 복사 완료'
-                                    setTimeout(() => {
-                                        btn.innerText = originalText
-                                    }, 2000)
-                                }
-                            }
-                        }}
-                        id="addr-copy-btn"
-                        className="w-full py-2.5 px-4 bg-gray-50 hover:bg-gray-100 text-gray-700 text-xs font-bold rounded-lg border border-gray-200 transition-colors flex items-center justify-center gap-1"
-                    >
-                        📋 주소 복사하기
-                    </button>
-                </div>
-
-                {/* Visitor Info Text for 7-3 */}
-                {isFromStory && (
-                    <div className="text-center mb-8 bg-gray-50 p-4 rounded-lg">
-                        <p className="text-gray-800 font-bold">
-                            친구가 방문했던 가게,<br />
-                            온천천 먹음직을 방문해 보세요!
+            ) : (
+                /* Home Tab Content */
+                <div className={styles.contentSection}>
+                    {/* Description */}
+                    <div className="mb-6">
+                        <p className="text-sm text-gray-800 leading-relaxed font-medium whitespace-pre-line">
+                            {store.description}
                         </p>
                     </div>
-                )}
 
-                {/* Gallery */}
-                <div className={styles.gallerySection}>
-                    <h3 className={styles.sectionTitle}>매장 둘러보기</h3>
+                    {/* Benefits */}
+                    <div className={styles.benefitCard}>
+                        <span className={styles.benefitLabel}>혜택 상세</span>
+                        <p className={styles.benefitText}>{store.benefitText}</p>
+                        <p className={styles.conditionText}>{store.usageCondition}</p>
+                    </div>
 
-                    {/* ... gallery items (no changes needed here but including context for replace) ... */}
-                    <div className={styles.galleryScroll}>
-                        {store.images.map((img, idx) => (
-                            <div key={idx} className={styles.galleryItem}>
-                                <img
-                                    src={img}
-                                    alt={`매장 사진 ${idx + 1}`}
-                                    className={styles.galleryImage}
-                                    loading="lazy"
-                                />
+                    {/* Address & Map */}
+                    <div className="mb-8 p-5 bg-white rounded-xl border border-gray-100 shadow-sm">
+                        <h3 className="text-sm font-bold text-gray-900 mb-2 flex items-center gap-2">
+                            📍 매장 위치
+                        </h3>
+                        <p className="text-sm text-gray-600 mb-3 leading-relaxed">
+                            {store.address || '주소 정보가 없습니다.'}
+                        </p>
+
+                        {store.mapUrl && (
+                            <div className="mb-4 rounded-lg overflow-hidden border border-gray-100">
+                                <img src={store.mapUrl} alt="약도" className="w-full h-auto object-cover" />
                             </div>
-                        ))}
+                        )}
+
+                        <button
+                            onClick={() => {
+                                if (store.address) {
+                                    navigator.clipboard.writeText(store.address)
+                                    const btn = document.getElementById('addr-copy-btn')
+                                    if (btn) {
+                                        const originalText = btn.innerText
+                                        btn.innerText = '✅ 복사 완료'
+                                        setTimeout(() => {
+                                            btn.innerText = originalText
+                                        }, 2000)
+                                    }
+                                }
+                            }}
+                            id="addr-copy-btn"
+                            className="w-full py-2.5 px-4 bg-gray-50 hover:bg-gray-100 text-gray-700 text-xs font-bold rounded-lg border border-gray-200 transition-colors flex items-center justify-center gap-1"
+                        >
+                            📋 주소 복사하기
+                        </button>
+                    </div>
+
+                    {/* Visitor Info Text for 7-3 */}
+                    {isFromStory && (
+                        <div className="text-center mb-8 bg-gray-50 p-4 rounded-lg">
+                            <p className="text-gray-800 font-bold">
+                                친구가 방문했던 가게,<br />
+                                {store.name}을 방문해 보세요!
+                            </p>
+                        </div>
+                    )}
+
+                    {/* Gallery (at bottom of home tab) */}
+                    <div className={styles.gallerySection}>
+                        <h3 className={styles.sectionTitle}>매장 둘러보기</h3>
+                        <div className={styles.galleryScroll}>
+                            {store.images.map((img, idx) => (
+                                <div key={idx} className={styles.galleryItem}>
+                                    <img
+                                        src={img}
+                                        alt={`매장 사진 ${idx + 1}`}
+                                        className={styles.galleryImage}
+                                        loading="lazy"
+                                    />
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </div>
-            </div>
+            )}
 
             {/* Bottom CTA */}
             <div className={styles.ctaBar}>
