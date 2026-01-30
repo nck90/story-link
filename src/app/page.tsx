@@ -26,7 +26,7 @@ export default function Home() {
       <div className={styles.pageWrapper}>
         <div className={styles.container}>
           <header className={styles.header}>
-            <h1 className={styles.headerTitle}>Story Link</h1>
+            <h1 className={styles.headerTitle}>storlink</h1>
             <div className={styles.profileIcon}></div>
           </header>
 
@@ -74,7 +74,7 @@ export default function Home() {
               onClick={handleLogoClick}
               style={{ cursor: 'pointer' }}
             >
-              Story Link
+              storlink
             </h1>
             <p className={styles.tagline}>
               친구들이 다녀간 맛집,<br />
@@ -96,7 +96,7 @@ export default function Home() {
               onClick={() => setShowStoreList(true)}
               className="btn btn-primary w-full"
             >
-              Story Link 입장하기
+              storlink 입장하기
             </button>
           </div>
         </main>
