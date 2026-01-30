@@ -59,7 +59,7 @@ export const STORES: Store[] = [
             '/resenso/KakaoTalk_20260129_135056760_07.jpg',
         ],
         mapUrl: '/resenso/류센소 약도.PNG',
-        benefitText: '새우튀김 1pc or 교자 3pc',
+        benefitText: '새우튀김 or 가라아게 3pc',
         uploaderBenefitText: '에이드 한잔',
         usageCondition: '메인 메뉴 주문 시', // Default assumption or leave empty
         pinCode: '0002',
