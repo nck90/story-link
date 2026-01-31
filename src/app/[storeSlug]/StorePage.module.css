@@ -388,17 +388,29 @@
 
 .categoryFilterBtn:active {
     transform: scale(0.95);
-    background: #f3f4f6;
+    background: #e5e7eb;
+    color: #111827;
+    /* Force dark text when pressed */
 }
 
 .categoryFilterBtn:hover {
-    background: #f9fafb;
+    background: #f3f4f6;
+    border-color: #d1d5db;
 }
 
 .categoryFilterBtnActive {
     background: #111827;
     color: #ffffff;
     border-color: #111827;
+}
+
+.categoryFilterBtnActive:active {
+    background: #1f2937;
+    color: #ffffff;
+}
+
+.categoryFilterBtnActive:hover {
+    background: #1f2937;
 }
 
 .soldOutCheckbox {
