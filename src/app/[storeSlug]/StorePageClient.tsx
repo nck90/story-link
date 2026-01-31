@@ -207,7 +207,7 @@ function StorePageClient({ store, isFromStory, storyLinkId }: StorePageClientPro
 
                     <div className={styles.uploaderBenefitBox}>
                         <p className={styles.uploaderBenefitTitle}>업로더에 대한 혜택</p>
-                        <p className={styles.uploaderBenefitText}>음료 한 병 무료</p>
+                        <p className={styles.uploaderBenefitText}>{store.uploaderBenefitText || '에이드 한 잔 무료'}</p>
                     </div>
 
                     <button
@@ -313,7 +313,7 @@ function StorePageClient({ store, isFromStory, storyLinkId }: StorePageClientPro
 
                     {/* Benefits */}
                     <div className={styles.benefitCard}>
-                        <span className={styles.benefitLabel}>혜택 상세</span>
+                        <span className={styles.benefitLabel}>쿠폰 방문자 혜택</span>
                         <p className={styles.benefitText}>{store.benefitText}</p>
                         <p className={styles.conditionText}>{store.usageCondition}</p>
                     </div>

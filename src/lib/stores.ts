@@ -205,7 +205,7 @@ export const STORES: Store[] = [
         ],
         mapUrl: '/resenso/류센소 약도.PNG',
         benefitText: '새우튀김 or 가라아게 3pc',
-        uploaderBenefitText: '에이드 한잔',
+        uploaderBenefitText: '에이드 한 잔 무료',
         usageCondition: '메인 메뉴 2개 주문 시', // Updated as requested
         pinCode: '0002',
     }
