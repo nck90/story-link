@@ -4,12 +4,88 @@ import { useState, memo } from 'react'
 import { useRouter } from 'next/navigation'
 import { nanoid } from 'nanoid'
 import styles from './StorePage.module.css'
-import { Store } from '@/lib/stores'
+import { Store, MenuCategory } from '@/lib/stores'
 
 interface StorePageClientProps {
     store: Store
     isFromStory: boolean
     storyLinkId: string | null
+}
+
+// Menu Content Component with filtering
+function MenuContent({ store }: { store: Store }) {
+    const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+    const [excludeSoldOut, setExcludeSoldOut] = useState(false)
+
+    const categories = store.menuCategories || []
+    const categoryTitles = categories.map(c => c.title)
+
+    // Filter categories based on selection
+    const filteredCategories = selectedCategory
+        ? categories.filter(c => c.title === selectedCategory)
+        : categories
+
+    return (
+        <div>
+            {/* Category Filter & SoldOut Checkbox */}
+            <div className={styles.menuFilterContainer}>
+                <div className={styles.categoryFilters}>
+                    <button
+                        className={`${styles.categoryFilterBtn} ${selectedCategory === null ? styles.categoryFilterBtnActive : ''}`}
+                        onClick={() => setSelectedCategory(null)}
+                    >
+                        전체
+                    </button>
+                    {categoryTitles.map((title, idx) => (
+                        <button
+                            key={idx}
+                            className={`${styles.categoryFilterBtn} ${selectedCategory === title ? styles.categoryFilterBtnActive : ''}`}
+                            onClick={() => setSelectedCategory(title)}
+                        >
+                            {title}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            {/* Menu List */}
+            {
+                filteredCategories.map((category, idx) => (
+                    <div key={idx}>
+                        {!selectedCategory && (
+                            <h4 className={styles.menuCategoryTitle}>{category.title}</h4>
+                        )}
+                        <div className={styles.menuCardList}>
+                            {category.items
+                                .filter(item => !excludeSoldOut || !item.isSoldOut)
+                                .map((item, itemIdx) => (
+                                    <div
+                                        key={itemIdx}
+                                        className={`${styles.menuCard} ${item.isSoldOut ? styles.menuCardSoldOut : ''}`}
+                                    >
+                                        <div className={styles.menuCardInfo}>
+                                            {item.isNew && (
+                                                <span className={styles.menuCardBadge}>신규</span>
+                                            )}
+                                            <h5 className={styles.menuCardName}>{item.name}</h5>
+                                            {item.description && (
+                                                <p className={styles.menuCardDesc}>{item.description}</p>
+                                            )}
+                                            <p className={styles.menuCardPrice}>{item.price}</p>
+                                        </div>
+                                        {item.imageUrl && (
+                                            <div className={styles.menuCardImage}>
+                                                <img src={item.imageUrl} alt={item.name} />
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                        </div>
+                    </div>
+                ))
+            }
+        </div >
+    )
 }
 
 function StorePageClient({ store, isFromStory, storyLinkId }: StorePageClientProps) {
@@ -209,7 +285,9 @@ function StorePageClient({ store, isFromStory, storyLinkId }: StorePageClientPro
                 /* Menu Tab Content */
                 <div className={styles.menuGridSection}>
                     <h3 className={styles.sectionTitle}>메뉴판</h3>
-                    {store.menus && store.menus.length > 0 ? (
+                    {store.menuCategories ? (
+                        <MenuContent store={store} />
+                    ) : store.menus && store.menus.length > 0 ? (
                         <div className={styles.menuGrid}>
                             {store.menus.map((img, idx) => (
                                 <div key={idx} className={styles.menuItem} onClick={() => window.open(img, '_blank')}>

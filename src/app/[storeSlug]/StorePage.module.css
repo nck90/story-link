@@ -349,3 +349,172 @@
     border-radius: 12px;
     font-size: 0.875rem;
 }
+
+/* ===== Menu Filter UI ===== */
+.menuFilterContainer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.categoryFilters {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    flex: 1;
+}
+
+.categoryFilters::-webkit-scrollbar {
+    display: none;
+}
+
+.categoryFilterBtn {
+    flex-shrink: 0;
+    padding: 8px 16px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #6b7280;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.categoryFilterBtn:active {
+    transform: scale(0.95);
+    background: #f3f4f6;
+}
+
+.categoryFilterBtn:hover {
+    background: #f9fafb;
+}
+
+.categoryFilterBtnActive {
+    background: #111827;
+    color: #ffffff;
+    border-color: #111827;
+}
+
+.soldOutCheckbox {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #6b7280;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.soldOutCheckbox input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #22c55e;
+    cursor: pointer;
+}
+
+/* ===== Menu Card Style (Reference UI) ===== */
+.menuCardList {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.menuCard {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 16px 0;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.menuCard:last-child {
+    border-bottom: none;
+}
+
+.menuCardInfo {
+    flex: 1;
+    padding-right: 16px;
+}
+
+.menuCardBadge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    color: #ffffff;
+    background: #dc2626;
+    padding: 3px 8px;
+    border-radius: 4px;
+    margin-bottom: 6px;
+}
+
+.menuCardName {
+    font-size: 16px;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 4px;
+}
+
+.menuCardDesc {
+    font-size: 13px;
+    color: #9ca3af;
+    margin-bottom: 8px;
+}
+
+.menuCardPrice {
+    font-size: 15px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.menuCardOrderCount {
+    font-size: 12px;
+    color: #9ca3af;
+    margin-top: 4px;
+}
+
+.menuCardImage {
+    width: 100px;
+    height: 100px;
+    border-radius: 8px;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: #f3f4f6;
+}
+
+.menuCardImage img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.menuCategoryTitle {
+    font-size: 18px;
+    font-weight: 700;
+    color: #111827;
+    margin-top: 24px;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.menuCategoryTitle:first-of-type {
+    margin-top: 0;
+}
+
+/* Sold out style */
+.menuCardSoldOut {
+    opacity: 0.5;
+}
+
+.menuCardSoldOut .menuCardName::after {
+    content: ' (품절)';
+    color: #ef4444;
+    font-size: 12px;
+}
