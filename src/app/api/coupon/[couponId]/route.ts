@@ -30,7 +30,8 @@ export async function GET(request: Request, { params }: RouteParams) {
 
         return NextResponse.json({
             ...coupon,
-            storeImage
+            storeImage,
+            storeAddress: store?.address || ''
         })
     } catch (error) {
         console.error('Failed to fetch coupon:', error)

@@ -20,6 +20,7 @@ interface CouponData {
     expiresAt?: string
     pinCode?: string
     storeImage?: string
+    storeAddress?: string
 }
 
 interface PageProps {
@@ -35,6 +36,7 @@ export default function CouponPage({ params }: PageProps) {
     const [linkCopied, setLinkCopied] = useState(false)
     const [timeLeft, setTimeLeft] = useState('')
     const [canUse, setCanUse] = useState(false)
+    const [addressCopied, setAddressCopied] = useState(false)
 
     useEffect(() => {
         params.then(p => {
@@ -187,6 +189,24 @@ export default function CouponPage({ params }: PageProps) {
         }
     }
 
+    const handleCopyAddress = async () => {
+        if (!coupon?.storeAddress) return
+        try {
+            await navigator.clipboard.writeText(coupon.storeAddress)
+            setAddressCopied(true)
+            setTimeout(() => setAddressCopied(false), 2000)
+        } catch {
+            const textArea = document.createElement('textarea')
+            textArea.value = coupon.storeAddress
+            document.body.appendChild(textArea)
+            textArea.select()
+            document.execCommand('copy')
+            document.body.removeChild(textArea)
+            setAddressCopied(true)
+            setTimeout(() => setAddressCopied(false), 2000)
+        }
+    }
+
     if (!coupon) return <div className="p-10 text-center">Loading...</div>
 
     return (
@@ -197,6 +217,18 @@ export default function CouponPage({ params }: PageProps) {
                 <p className="text-sm text-gray-500 mb-6 font-medium">
                     {coupon.benefit}
                 </p>
+
+                {coupon.storeAddress && (
+                    <div className={styles.addressBox}>
+                        <span className={styles.addressText}>📍 {coupon.storeAddress}</span>
+                        <button
+                            onClick={handleCopyAddress}
+                            className={styles.copyAddressBtn}
+                        >
+                            {addressCopied ? '복사됨' : '주소 복사'}
+                        </button>
+                    </div>
+                )}
 
                 {mode === 'view' && (
                     <>
